@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="css/local-version/roboto-300-400-500.css" />
+    <link rel="stylesheet" href="css/local-version/mui-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/lib/react.production-17.0.2.min.js"></script>
+    <script src="js/lib/react-dom.production-17.0.2.min.js"></script>
+    <script src="js/lib/material-ui.production-4.12.1.min.js"></script>
+
+    <script src="js/react-imports.js"></script>
+    <script src="js/data-functions.js"></script>
+
+    <script src="js/mock-fe-be-bridge.js"></script>
+    <script src="js/backend-functions.js"></script>
+
+    <script src="js/components/utils.js"></script>
+
+    <script src="js/components/UseCardCounts.js"></script>
+    <script src="js/components/UseMessagePopup.js"></script>
+    <script src="js/components/Pagination.js"></script>
+    <script src="js/components/UsePagination.js"></script>
+    <script src="js/components/UseTags.js"></script>
+    <script src="js/components/UseDelayCoefs.js"></script>
+    <script src="js/components/UseDefaultDelayCoefs.js"></script>
+    <script src="js/components/UseMaxDelay.js"></script>
+    <script src="js/components/UseTextReader.js"></script>
+    <script src="js/components/UseTranslateCardHistory.js"></script>
+    <script src="js/components/KeyPad.js"></script>
+    <script src="js/components/TextParamView.js"></script>
+    <script src="js/components/ListOfObjectsCmp.js"></script>
+    <script src="js/components/TagSelector.js"></script>
+    <script src="js/components/DateSelector.js"></script>
+    <script src="js/components/IntRangeSelector.js"></script>
+    <script src="js/components/SortBySelector.js"></script>
+
+    <script src="js/components/SharedFileReceiver.js"></script>
+    <script src="js/components/BackupsView.js"></script>
+    <script src="js/components/HttpServerView.js"></script>
+
+    <script src="js/components/DelayForm.js"></script>
+    <script src="js/components/DelayCoefsSettingsCmp.js"></script>
+    <script src="js/components/DelayCmp.js"></script>
+    <script src="js/components/EditTranslateCardForm.js"></script>
+    <script src="js/components/CreateCardView.js"></script>
+    <script src="js/components/RepeatTranslateCardCmp.js"></script>
+    <script src="js/components/RepeatCardsView.js"></script>
+    <script src="js/components/EditTranslateCardCmp.js"></script>
+    <script src="js/components/TagsView.js"></script>
+    <script src="js/components/EditTagForm.js"></script>
+    <script src="js/components/EditTagCmp.js"></script>
+    <script src="js/components/TranslateCardFilterCmp.js"></script>
+    <script src="js/components/CardsSearchView.js"></script>
+
+
+    <script src="js/components/ViewSelector.js"></script>
+</head>
+<body style="background-color: #d5f5e6">
+<div id="react-container"></div>
+</body>
+<script>
+    const IS_IN_WEBVIEW = true
+    const ROOT_REACT_COMPONENT = null
+    ReactDOM.render(
+        re(ROOT_REACT_COMPONENT??ViewSelector),
+        document.getElementById('react-container')
+    )
+</script>
+</html>
