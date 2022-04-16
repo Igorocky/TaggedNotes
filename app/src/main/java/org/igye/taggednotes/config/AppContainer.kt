@@ -27,13 +27,13 @@ class AppContainer(
     val clock = Clock.systemDefaultZone()
     val beThreadPool: ExecutorService = Executors.newFixedThreadPool(4)
 
-    val cards = CardsTable(clock = clock)
+    val cards = ObjectsTable(clock = clock)
     val cardsSchedule = CardsScheduleTable(clock = clock, cards = cards)
     val translationCards = TranslationCardsTable(clock = clock, cards = cards)
     val translationCardsLog = TranslationCardsLogTable(clock = clock)
     val tags = TagsTable(clock = clock)
-    val cardToTag = CardToTagTable(clock = clock, cards = cards, tags = tags)
-    val noteCards = NoteCardsTable(clock = clock, cards = cards)
+    val cardToTag = ObjectToTagTable(clock = clock, objects = cards, tags = tags)
+    val noteCards = NotesTable(clock = clock, objs = cards)
 
     val repositoryManager = RepositoryManager(context = context, clock = clock, repositoryProvider = {createNewRepo()})
     val settingsManager = SettingsManager(context = context)
@@ -48,13 +48,13 @@ class AppContainer(
         return Repository(
             context = context,
             dbName = dbName,
-            cards = cards,
+            objs = cards,
             cardsSchedule = cardsSchedule,
             translationCards = translationCards,
             translationCardsLog = translationCardsLog,
             tags = tags,
-            cardToTag = cardToTag,
-            noteCards = noteCards
+            objToTag = cardToTag,
+            notes = noteCards
         )
     }
 

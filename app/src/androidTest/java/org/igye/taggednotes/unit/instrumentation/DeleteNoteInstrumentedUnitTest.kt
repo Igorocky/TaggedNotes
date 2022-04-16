@@ -1,15 +1,15 @@
 package org.igye.taggednotes.unit.instrumentation
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.igye.taggednotes.manager.DataManager.CreateTranslateCardArgs
-import org.igye.taggednotes.manager.DataManager.DeleteTranslateCardArgs
+import org.igye.taggednotes.manager.DataManager.CreateNoteArgs
+import org.igye.taggednotes.manager.DataManager.DeleteNoteArgs
 import org.igye.taggednotes.testutils.InstrumentedTestBase
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class DeleteTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
+class DeleteNoteInstrumentedUnitTest: InstrumentedTestBase() {
 
     @Test
     fun deleteTranslateCard_deletes_translate_card() {
@@ -17,13 +17,13 @@ class DeleteTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val expectedTextToTranslate = "A"
         val expectedTranslation = "a"
         val timeCreated = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(
-            CreateTranslateCardArgs(textToTranslate = expectedTextToTranslate, translation = expectedTranslation)
+        val cardId = dm.createNote(
+            CreateNoteArgs(text = expectedTextToTranslate, translation = expectedTranslation)
         ).data!!
 
         //when
         val timeDeleted = testClock.plus(1000)
-        val deleteTranslateCardResp = dm.deleteTranslateCard(DeleteTranslateCardArgs(cardId = cardId))
+        val deleteTranslateCardResp = dm.deleteNote(DeleteNoteArgs(noteId = cardId))
 
         //then
         assertNotNull(deleteTranslateCardResp.data!!)
@@ -54,16 +54,16 @@ class DeleteTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val expectedTextToTranslate2 = "B"
         val expectedTranslation2 = "b"
         val timeCreated1 = testClock.currentMillis()
-        val cardId1 = dm.createTranslateCard(
-            CreateTranslateCardArgs(textToTranslate = expectedTextToTranslate1, translation = expectedTranslation1)
+        val cardId1 = dm.createNote(
+            CreateNoteArgs(text = expectedTextToTranslate1, translation = expectedTranslation1)
         ).data!!
         val timeDeleted1 = testClock.plus(1000)
-        dm.deleteTranslateCard(DeleteTranslateCardArgs(cardId = cardId1))
+        dm.deleteNote(DeleteNoteArgs(noteId = cardId1))
 
         //when
         val timeCreated2 = testClock.plus(1000)
-        val cardId2 = dm.createTranslateCard(
-            CreateTranslateCardArgs(textToTranslate = expectedTextToTranslate2, translation = expectedTranslation2)
+        val cardId2 = dm.createNote(
+            CreateNoteArgs(text = expectedTextToTranslate2, translation = expectedTranslation2)
         ).data!!
 
         //then

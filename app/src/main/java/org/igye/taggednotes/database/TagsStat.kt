@@ -27,8 +27,8 @@ class TagsStat(
         }
     }
 
-    private val cardToTag = repositoryManager.getRepo().cardToTag
-    private val getTagUsageCountsQuery = "select ${cardToTag.tagId} id, count(1) cnt from $cardToTag group by ${cardToTag.tagId}"
+    private val objToTag = repositoryManager.getRepo().objToTag
+    private val getTagUsageCountsQuery = "select ${objToTag.tagId} id, count(1) cnt from $objToTag group by ${objToTag.tagId}"
     private val getTagUsageCountsColumnNames = arrayOf("id", "cnt")
     private fun getTagUsageCounts(): Map<Long,Long> {
         if (tagUsageCounts.get() == null || changeCnt.get() > 100) {

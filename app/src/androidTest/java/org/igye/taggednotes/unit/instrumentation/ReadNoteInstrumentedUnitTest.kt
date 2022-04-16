@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 import java.time.temporal.ChronoUnit
 
 @RunWith(AndroidJUnit4::class)
-class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
+class ReadNoteInstrumentedUnitTest: InstrumentedTestBase() {
 
     @Test
     fun readTranslateCardById_returns_all_tags_of_the_card() {
@@ -23,12 +23,12 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val tagId1 = dm.createTag(CreateTagArgs("t1")).data!!
         val tagId2 = dm.createTag(CreateTagArgs("t2")).data!!
         val tagId3 = dm.createTag(CreateTagArgs("t3")).data!!
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(
-            textToTranslate = "a", translation = "b", tagIds = setOf(tagId1, tagId3)
+        val cardId = dm.createNote(CreateNoteArgs(
+            text = "a", translation = "b", tagIds = setOf(tagId1, tagId3)
         )).data!!
 
         //when
-        val actualCard = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = cardId)).data!!
+        val actualCard = dm.readNoteById(ReadNoteByIdArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(2, actualCard.tagIds.size)
@@ -78,16 +78,16 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(t.cardId to expectedCardId2, t.textToTranslate to textToTranslate2, t.translation to translation2),
         ))
         insert(repo = repo, table = ctg, rows = listOf(
-            listOf(ctg.cardId to expectedCardId1, ctg.tagId to tagId1),
-            listOf(ctg.cardId to expectedCardId1, ctg.tagId to tagId2),
-            listOf(ctg.cardId to expectedCardId2, ctg.tagId to tagId2),
-            listOf(ctg.cardId to expectedCardId2, ctg.tagId to tagId3),
+            listOf(ctg.objId to expectedCardId1, ctg.tagId to tagId1),
+            listOf(ctg.objId to expectedCardId1, ctg.tagId to tagId2),
+            listOf(ctg.objId to expectedCardId2, ctg.tagId to tagId2),
+            listOf(ctg.objId to expectedCardId2, ctg.tagId to tagId3),
         ))
 
         //when
         val readTime = testClock.plus(2, ChronoUnit.MINUTES)
-        val card1 = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = expectedCardId1)).data!!
-        val card2 = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = expectedCardId2)).data!!
+        val card1 = dm.readNoteById(ReadNoteByIdArgs(noteId = expectedCardId1)).data!!
+        val card2 = dm.readNoteById(ReadNoteByIdArgs(noteId = expectedCardId2)).data!!
 
         //then
         assertEquals(expectedCardId1, card1.id)
@@ -129,12 +129,12 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val tagId1 = dm.createTag(CreateTagArgs("t1")).data!!
         val tagId2 = dm.createTag(CreateTagArgs("t2")).data!!
         val tagId3 = dm.createTag(CreateTagArgs("t3")).data!!
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(
-            textToTranslate = "a", translation = "b", tagIds = setOf()
+        val cardId = dm.createNote(CreateNoteArgs(
+            text = "a", translation = "b", tagIds = setOf()
         )).data!!
 
         //when
-        val actualCard = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = cardId)).data!!
+        val actualCard = dm.readNoteById(ReadNoteByIdArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(0, actualCard.tagIds.size)
@@ -392,7 +392,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(s.cardId to expectedNoteCardId, s.updatedAt to 0, s.origDelay to "1m", s.delay to "1m", s.randomFactor to 1.0, s.nextAccessInMillis to 100, s.nextAccessAt to baseTime + 100)
         ))
         insert(repo = repo, table = n, rows = listOf(
-            listOf(n.cardId to expectedNoteCardId, n.text to "0")
+            listOf(n.noteId to expectedNoteCardId, n.text to "0")
         ))
 
         insert(repo = repo, table = c, rows = listOf(
@@ -420,7 +420,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_are_few_data_and_validation_history_records() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val validationTime2 = testClock.plus(2, ChronoUnit.MINUTES)
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "a")).data!!.isCorrect)
@@ -432,7 +432,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "a")).data!!.isCorrect)
 
         val updateTime5 = testClock.plus(5, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "B", translation = "b"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "B", translation = "b"))
 
         val validationTime6 = testClock.plus(6, ChronoUnit.MINUTES)
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "bb")).data!!.isCorrect)
@@ -444,7 +444,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "bb")).data!!.isCorrect)
 
         val updateTime9 = testClock.plus(9, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "C", translation = "c"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "C", translation = "c"))
 
         val validationTime10 = testClock.plus(10, ChronoUnit.MINUTES)
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "c-1")).data!!.isCorrect)
@@ -456,13 +456,13 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "c-3")).data!!.isCorrect)
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(3, actualHistory.dataHistory.size)
 
         assertEquals(updateTime9, actualHistory.dataHistory[0].timestamp)
-        assertEquals("C", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("C", actualHistory.dataHistory[0].text)
         assertEquals("c", actualHistory.dataHistory[0].translation)
         assertEquals(3, actualHistory.dataHistory[0].validationHistory.size)
 
@@ -482,7 +482,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(actualHistory.dataHistory[0].validationHistory[2].isCorrect)
 
         assertEquals(updateTime5, actualHistory.dataHistory[1].timestamp)
-        assertEquals("B", actualHistory.dataHistory[1].textToTranslate)
+        assertEquals("B", actualHistory.dataHistory[1].text)
         assertEquals("b", actualHistory.dataHistory[1].translation)
         assertEquals(3, actualHistory.dataHistory[1].validationHistory.size)
 
@@ -502,7 +502,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(actualHistory.dataHistory[1].validationHistory[2].isCorrect)
 
         assertEquals(createTime1, actualHistory.dataHistory[2].timestamp)
-        assertEquals("A", actualHistory.dataHistory[2].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[2].text)
         assertEquals("a", actualHistory.dataHistory[2].translation)
         assertEquals(3, actualHistory.dataHistory[2].validationHistory.size)
 
@@ -526,16 +526,16 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_are_no_data_changes_and_no_validation_at() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(1, actualHistory.dataHistory.size)
 
         assertEquals(createTime1, actualHistory.dataHistory[0].timestamp)
-        assertEquals("A", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[0].text)
         assertEquals("a", actualHistory.dataHistory[0].translation)
         assertEquals(0, actualHistory.dataHistory[0].validationHistory.size)
     }
@@ -544,19 +544,19 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_are_no_data_changes_and_one_validation() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val validationTime2 = testClock.plus(2, ChronoUnit.MINUTES)
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "a")).data!!.isCorrect)
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(1, actualHistory.dataHistory.size)
 
         assertEquals(createTime1, actualHistory.dataHistory[0].timestamp)
-        assertEquals("A", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[0].text)
         assertEquals("a", actualHistory.dataHistory[0].translation)
         assertEquals(1, actualHistory.dataHistory[0].validationHistory.size)
 
@@ -569,7 +569,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_are_no_data_changes_and_two_validations() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val validationTime2 = testClock.plus(2, ChronoUnit.MINUTES)
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "a")).data!!.isCorrect)
@@ -578,13 +578,13 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "aa")).data!!.isCorrect)
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(1, actualHistory.dataHistory.size)
 
         assertEquals(createTime1, actualHistory.dataHistory[0].timestamp)
-        assertEquals("A", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[0].text)
         assertEquals("a", actualHistory.dataHistory[0].translation)
         assertEquals(2, actualHistory.dataHistory[0].validationHistory.size)
 
@@ -601,24 +601,24 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_is_one_data_change_and_no_validations_at_all() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val updateTime5 = testClock.plus(5, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "B", translation = "b"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "B", translation = "b"))
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(2, actualHistory.dataHistory.size)
 
         assertEquals(updateTime5, actualHistory.dataHistory[0].timestamp)
-        assertEquals("B", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("B", actualHistory.dataHistory[0].text)
         assertEquals("b", actualHistory.dataHistory[0].translation)
         assertEquals(0, actualHistory.dataHistory[0].validationHistory.size)
 
         assertEquals(createTime1, actualHistory.dataHistory[1].timestamp)
-        assertEquals("A", actualHistory.dataHistory[1].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[1].text)
         assertEquals("a", actualHistory.dataHistory[1].translation)
         assertEquals(0, actualHistory.dataHistory[1].validationHistory.size)
     }
@@ -627,22 +627,22 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_is_one_data_change_and_no_validations_for_first_data_change_and_one_validation_for_second_data_change() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val updateTime5 = testClock.plus(5, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "B", translation = "b"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "B", translation = "b"))
 
         val validationTime6 = testClock.plus(6, ChronoUnit.MINUTES)
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "bb")).data!!.isCorrect)
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(2, actualHistory.dataHistory.size)
 
         assertEquals(updateTime5, actualHistory.dataHistory[0].timestamp)
-        assertEquals("B", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("B", actualHistory.dataHistory[0].text)
         assertEquals("b", actualHistory.dataHistory[0].translation)
         assertEquals(1, actualHistory.dataHistory[0].validationHistory.size)
 
@@ -651,7 +651,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(actualHistory.dataHistory[0].validationHistory[0].isCorrect)
 
         assertEquals(createTime1, actualHistory.dataHistory[1].timestamp)
-        assertEquals("A", actualHistory.dataHistory[1].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[1].text)
         assertEquals("a", actualHistory.dataHistory[1].translation)
         assertEquals(0, actualHistory.dataHistory[1].validationHistory.size)
     }
@@ -660,10 +660,10 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_is_one_data_change_and_no_validations_for_first_data_change_and_two_validations_for_second_data_change() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val updateTime5 = testClock.plus(5, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "B", translation = "b"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "B", translation = "b"))
 
         val validationTime6 = testClock.plus(6, ChronoUnit.MINUTES)
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "bb")).data!!.isCorrect)
@@ -672,13 +672,13 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "b")).data!!.isCorrect)
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(2, actualHistory.dataHistory.size)
 
         assertEquals(updateTime5, actualHistory.dataHistory[0].timestamp)
-        assertEquals("B", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("B", actualHistory.dataHistory[0].text)
         assertEquals("b", actualHistory.dataHistory[0].translation)
         assertEquals(2, actualHistory.dataHistory[0].validationHistory.size)
 
@@ -691,7 +691,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(actualHistory.dataHistory[0].validationHistory[1].isCorrect)
 
         assertEquals(createTime1, actualHistory.dataHistory[1].timestamp)
-        assertEquals("A", actualHistory.dataHistory[1].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[1].text)
         assertEquals("a", actualHistory.dataHistory[1].translation)
         assertEquals(0, actualHistory.dataHistory[1].validationHistory.size)
     }
@@ -700,27 +700,27 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_is_one_data_change_and_no_validations_for_second_data_change_and_one_validation_for_first_data_change() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val validationTime2 = testClock.plus(2, ChronoUnit.MINUTES)
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "a")).data!!.isCorrect)
 
         val updateTime5 = testClock.plus(5, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "B", translation = "b"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "B", translation = "b"))
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(2, actualHistory.dataHistory.size)
 
         assertEquals(updateTime5, actualHistory.dataHistory[0].timestamp)
-        assertEquals("B", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("B", actualHistory.dataHistory[0].text)
         assertEquals("b", actualHistory.dataHistory[0].translation)
         assertEquals(0, actualHistory.dataHistory[0].validationHistory.size)
 
         assertEquals(createTime1, actualHistory.dataHistory[1].timestamp)
-        assertEquals("A", actualHistory.dataHistory[1].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[1].text)
         assertEquals("a", actualHistory.dataHistory[1].translation)
         assertEquals(1, actualHistory.dataHistory[1].validationHistory.size)
 
@@ -733,7 +733,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_is_one_data_change_and_no_validations_for_second_data_change_and_two_validations_for_first_data_change() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val validationTime2 = testClock.plus(2, ChronoUnit.MINUTES)
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "a")).data!!.isCorrect)
@@ -742,21 +742,21 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "aa")).data!!.isCorrect)
 
         val updateTime5 = testClock.plus(5, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "B", translation = "b"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "B", translation = "b"))
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(2, actualHistory.dataHistory.size)
 
         assertEquals(updateTime5, actualHistory.dataHistory[0].timestamp)
-        assertEquals("B", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("B", actualHistory.dataHistory[0].text)
         assertEquals("b", actualHistory.dataHistory[0].translation)
         assertEquals(0, actualHistory.dataHistory[0].validationHistory.size)
 
         assertEquals(createTime1, actualHistory.dataHistory[1].timestamp)
-        assertEquals("A", actualHistory.dataHistory[1].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[1].text)
         assertEquals("a", actualHistory.dataHistory[1].translation)
         assertEquals(2, actualHistory.dataHistory[1].validationHistory.size)
 
@@ -773,28 +773,28 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     fun readTranslateCardHistory_when_there_are_two_data_changes_and_no_validations_for_middle_data_change_and_one_validation_for_each_of_other_data_changes() {
         //given
         val createTime1 = testClock.currentMillis()
-        val cardId = dm.createTranslateCard(CreateTranslateCardArgs(textToTranslate = "A", translation = "a")).data!!
+        val cardId = dm.createNote(CreateNoteArgs(text = "A", translation = "a")).data!!
 
         val validationTime2 = testClock.plus(2, ChronoUnit.MINUTES)
         assertTrue(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "a")).data!!.isCorrect)
 
         val updateTime5 = testClock.plus(5, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "B", translation = "b"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "B", translation = "b"))
 
         val updateTime9 = testClock.plus(9, ChronoUnit.MINUTES)
-        dm.updateTranslateCard(UpdateTranslateCardArgs(cardId = cardId, textToTranslate = "C", translation = "c"))
+        dm.updateNote(UpdateNoteArgs(noteId = cardId, text = "C", translation = "c"))
 
         val validationTime10 = testClock.plus(10, ChronoUnit.MINUTES)
         assertFalse(dm.validateTranslateCard(ValidateTranslateCardArgs(cardId = cardId, userProvidedTranslation = "c-1")).data!!.isCorrect)
 
         //when
-        val actualHistory = dm.readTranslateCardHistory(ReadTranslateCardHistoryArgs(cardId = cardId)).data!!
+        val actualHistory = dm.readNoteHistory(ReadNoteHistoryArgs(noteId = cardId)).data!!
 
         //then
         assertEquals(3, actualHistory.dataHistory.size)
 
         assertEquals(updateTime9, actualHistory.dataHistory[0].timestamp)
-        assertEquals("C", actualHistory.dataHistory[0].textToTranslate)
+        assertEquals("C", actualHistory.dataHistory[0].text)
         assertEquals("c", actualHistory.dataHistory[0].translation)
         assertEquals(1, actualHistory.dataHistory[0].validationHistory.size)
 
@@ -803,12 +803,12 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertFalse(actualHistory.dataHistory[0].validationHistory[0].isCorrect)
 
         assertEquals(updateTime5, actualHistory.dataHistory[1].timestamp)
-        assertEquals("B", actualHistory.dataHistory[1].textToTranslate)
+        assertEquals("B", actualHistory.dataHistory[1].text)
         assertEquals("b", actualHistory.dataHistory[1].translation)
         assertEquals(0, actualHistory.dataHistory[1].validationHistory.size)
 
         assertEquals(createTime1, actualHistory.dataHistory[2].timestamp)
-        assertEquals("A", actualHistory.dataHistory[2].textToTranslate)
+        assertEquals("A", actualHistory.dataHistory[2].text)
         assertEquals("a", actualHistory.dataHistory[2].translation)
         assertEquals(1, actualHistory.dataHistory[2].validationHistory.size)
 
@@ -828,7 +828,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val card3 = createCard(cardId = 3L, tagIds = listOf(tagId2, tagId3))
 
         //when
-        val foundCards = dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs())
+        val foundCards = dm.readNotesByFilter(ReadNotesByFilterArgs())
 
         //then
         assertSearchResult(listOf(card1, card2, card3), foundCards)
@@ -850,7 +850,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by 0 tags - all cards are returned
         assertSearchResult(
             listOf(card1, card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf()
             ))
         )
@@ -858,7 +858,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by one tag
         assertSearchResult(
             listOf(card1, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId2)
             ))
         )
@@ -866,7 +866,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by two tags
         assertSearchResult(
             listOf(card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId3, tagId2)
             ))
         )
@@ -874,7 +874,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by three tags - empty result
         assertSearchResult(
             listOf(),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId1, tagId2, tagId3)
             ))
         )
@@ -882,7 +882,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by three tags - non-empty result
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId4, tagId5, tagId6)
             ))
         )
@@ -904,7 +904,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by 0 tags - all cards are returned
         assertSearchResult(
             listOf(card1, card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf()
             ))
         )
@@ -912,7 +912,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by one tag
         assertSearchResult(
             listOf(card1, card2, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf(tagId3)
             ))
         )
@@ -920,7 +920,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by two tags
         assertSearchResult(
             listOf(card2, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf(tagId3, tagId2)
             ))
         )
@@ -928,7 +928,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by three tags - non-empty result
         assertSearchResult(
             listOf(card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf(tagId1, tagId2, tagId4)
             ))
         )
@@ -949,7 +949,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId2, tagId3),
                 tagIdsToExclude = setOf(tagId4, tagId5),
             ))
@@ -965,14 +965,14 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = false
             ))
         )
 
         assertSearchResult(
             listOf(card2, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = true
             ))
         )
@@ -987,8 +987,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                textToTranslateContains = "Bc"
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                textContains = "Bc"
             ))
         )
     }
@@ -1002,9 +1002,9 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = false,
-                textToTranslateContains = "Bc"
+                textContains = "Bc"
             ))
         )
     }
@@ -1026,9 +1026,9 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card6),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = true,
-                textToTranslateContains = "Bc",
+                textContains = "Bc",
                 tagIdsToInclude = setOf(tagId1,tagId2),
                 tagIdsToExclude = setOf(tagId3)
             ))
@@ -1045,7 +1045,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 textToTranslateLengthLessThan = 4
             ))
         )
@@ -1061,7 +1061,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 textToTranslateLengthGreaterThan = 4
             ))
         )
@@ -1077,7 +1077,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 textToTranslateLengthGreaterThan = 3,
                 textToTranslateLengthLessThan = 5,
             ))
@@ -1093,7 +1093,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationContains = "Bc"
             ))
         )
@@ -1109,7 +1109,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationLengthLessThan = 4
             ))
         )
@@ -1125,7 +1125,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationLengthGreaterThan = 4
             ))
         )
@@ -1141,7 +1141,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationLengthGreaterThan = 3,
                 translationLengthLessThan = 5,
             ))
@@ -1158,7 +1158,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3, card4, card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 createdFrom = 3
             ))
         )
@@ -1174,7 +1174,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 createdTill = 3
             ))
         )
@@ -1190,7 +1190,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 createdFrom = 2,
                 createdTill = 4
             ))
@@ -1217,7 +1217,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3, card4, card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card3.schedule.nextAccessAt
             )),
             skipTimeSinceLastCheck = true,
@@ -1226,7 +1226,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4, card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card3.schedule.nextAccessAt+1
             )),
             skipTimeSinceLastCheck = true,
@@ -1254,7 +1254,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessTill = card3.schedule.nextAccessAt
             )),
             skipTimeSinceLastCheck = true,
@@ -1263,7 +1263,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessTill = card3.schedule.nextAccessAt-1
             )),
             skipTimeSinceLastCheck = true,
@@ -1291,7 +1291,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card2.schedule.nextAccessAt,
                 nextAccessTill = card4.schedule.nextAccessAt,
             )),
@@ -1301,7 +1301,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card2.schedule.nextAccessAt+1,
                 nextAccessTill = card4.schedule.nextAccessAt-1,
             )),
@@ -1320,7 +1320,7 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 overdueGreaterEq = 0.0
             ))
         )
@@ -1336,16 +1336,16 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 sortDir = SortDirection.ASC
             )),
             matchOrder = true
@@ -1353,8 +1353,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card5,card4,card3,card2,card1),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 sortDir = SortDirection.DESC
             )),
             matchOrder = true
@@ -1362,16 +1362,16 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2,card5,card4,card1,card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.TIME_CREATED
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.TIME_CREATED
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             listOf(card2,card5,card4,card1,card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.TIME_CREATED,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.TIME_CREATED,
                 sortDir = SortDirection.ASC
             )),
             matchOrder = true
@@ -1379,8 +1379,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3,card1,card4,card5,card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.TIME_CREATED,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.TIME_CREATED,
                 sortDir = SortDirection.DESC
             )),
             matchOrder = true
@@ -1394,16 +1394,16 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             cardsSortedByNextAccessAtAsc,
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.NEXT_ACCESS_AT
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.NEXT_ACCESS_AT
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             cardsSortedByNextAccessAtAsc,
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.NEXT_ACCESS_AT,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.NEXT_ACCESS_AT,
                 sortDir = SortDirection.ASC
             )),
             matchOrder = true
@@ -1411,8 +1411,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             cardsSortedByNextAccessAtAsc.reversed(),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.NEXT_ACCESS_AT,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.NEXT_ACCESS_AT,
                 sortDir = SortDirection.DESC
             )),
             matchOrder = true
@@ -1429,16 +1429,16 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 100
             )),
             matchOrder = true
@@ -1446,8 +1446,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 5
             )),
             matchOrder = true
@@ -1455,8 +1455,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 4
             )),
             matchOrder = true
@@ -1464,8 +1464,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 2
             )),
             matchOrder = true
@@ -1473,8 +1473,8 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 1
             )),
             matchOrder = true
@@ -1482,13 +1482,13 @@ class ReadTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
     }
 
     private fun assertSearchResult(
-        expected: List<TranslateCard>,
-        actual: BeRespose<ReadTranslateCardsByFilterResp>,
+        expected: List<Note>,
+        actual: BeRespose<ReadNotesByFilterResp>,
         matchOrder:Boolean = false,
         skipTimeSinceLastCheck: Boolean = false,
         skipOverdue: Boolean = false,
     ) {
-        val actualCardsList = actual.data!!.cards
+        val actualCardsList = actual.data!!.notes
         assertEquals(expected.size, actualCardsList.size)
         var cnt = 0
         if (matchOrder) {

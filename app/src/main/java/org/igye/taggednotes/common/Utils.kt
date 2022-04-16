@@ -209,24 +209,24 @@ object Utils {
         return result
     }
 
-    fun executeInsert(table: Table, stmt: SQLiteStatement): Long {
+    fun executeInsert(stmt: SQLiteStatement): Long {
         val id = stmt.executeInsert()
         if (id < 0) {
             throw TaggedNotesException(
                 errCode = ErrorCode.ERROR_INSERTING_A_RECORD_TO_A_TABLE,
-                msg = "Negative id was returned when inserting a record to $table table."
+                msg = "Negative id was returned when inserting a record with the statement: '$stmt'."
             )
         } else {
             return id
         }
     }
 
-    fun executeUpdateDelete(table: Table, stmt: SQLiteStatement, expectedNumberOfRows: Int? = null): Int {
+    fun executeUpdateDelete(stmt: SQLiteStatement, expectedNumberOfRows: Int? = null): Int {
         val count = stmt.executeUpdateDelete()
         if (expectedNumberOfRows != null && count != expectedNumberOfRows) {
             throw TaggedNotesException(
                 errCode = ErrorCode.ERROR_UPDATING_OR_DELETING_FROM_A_TABLE,
-                msg = "Number of rows updated/deleted from $table doesn't match expected value."
+                msg = "Number of updated/deleted rows doesn't match expected value for statement '$stmt'."
             )
         } else {
             return count

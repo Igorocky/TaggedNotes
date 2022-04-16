@@ -3,12 +3,11 @@ package org.igye.taggednotes.database
 import org.igye.taggednotes.ErrorCode
 import org.igye.taggednotes.common.TaggedNotesException
 
-enum class CardType(val intValue: Long) {
-    TRANSLATION(intValue = 1),
-    NOTE(intValue = 2);
+enum class ObjectType(val intValue: Long) {
+    NOTE(intValue = 1);
 
     companion object {
-        fun fromInt(intValue: Long): CardType {
+        fun fromInt(intValue: Long): ObjectType {
             for (value in values()) {
                 if (value.intValue == intValue) {
                     return value

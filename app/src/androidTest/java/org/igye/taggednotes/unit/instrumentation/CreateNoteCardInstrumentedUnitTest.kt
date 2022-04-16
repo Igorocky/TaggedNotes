@@ -40,8 +40,8 @@ class CreateNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         assertTableContent(repo = repo, table = t, matchColumn = t.cardId, expectedRows = listOf())
         assertTableContent(repo = repo, table = t.ver, expectedRows = listOf())
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.cardId, expectedRows = listOf(
-            listOf(n.cardId to noteCard.id, n.text to expectedText.trim())
+        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
+            listOf(n.noteId to noteCard.id, n.text to expectedText.trim())
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
 
@@ -87,15 +87,15 @@ class CreateNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(tg.id to tagId2, tg.createdAt to time1, tg.name to "t2"),
         ))
         assertTableContent(repo = repo, table = ctg, expectedRows = listOf(
-            listOf(ctg.cardId to noteCardId, ctg.tagId to tagId1),
-            listOf(ctg.cardId to noteCardId, ctg.tagId to tagId2),
+            listOf(ctg.objId to noteCardId, ctg.tagId to tagId1),
+            listOf(ctg.objId to noteCardId, ctg.tagId to tagId2),
         ))
 
         assertTableContent(repo = repo, table = t, matchColumn = t.cardId, expectedRows = listOf())
         assertTableContent(repo = repo, table = t.ver, expectedRows = listOf())
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.cardId, expectedRows = listOf(
-            listOf(n.cardId to noteCard.id, n.text to expectedText)
+        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
+            listOf(n.noteId to noteCard.id, n.text to expectedText)
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
 

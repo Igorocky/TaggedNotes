@@ -74,14 +74,14 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(s.cardId to expectedCardId2, s.updatedAt to updatedAt2, s.origDelay to origDelay2, s.delay to delay2, s.randomFactor to 1.0, s.nextAccessInMillis to nextAccessInMillis2, s.nextAccessAt to nextAccessAt2),
         ))
         insert(repo = repo, table = n, rows = listOf(
-            listOf(n.cardId to expectedCardId1, n.text to text1),
-            listOf(n.cardId to expectedCardId2, n.text to text2),
+            listOf(n.noteId to expectedCardId1, n.text to text1),
+            listOf(n.noteId to expectedCardId2, n.text to text2),
         ))
         insert(repo = repo, table = ctg, rows = listOf(
-            listOf(ctg.cardId to expectedCardId1, ctg.tagId to tagId1),
-            listOf(ctg.cardId to expectedCardId1, ctg.tagId to tagId2),
-            listOf(ctg.cardId to expectedCardId2, ctg.tagId to tagId2),
-            listOf(ctg.cardId to expectedCardId2, ctg.tagId to tagId3),
+            listOf(ctg.objId to expectedCardId1, ctg.tagId to tagId1),
+            listOf(ctg.objId to expectedCardId1, ctg.tagId to tagId2),
+            listOf(ctg.objId to expectedCardId2, ctg.tagId to tagId2),
+            listOf(ctg.objId to expectedCardId2, ctg.tagId to tagId3),
         ))
 
         //when
@@ -149,7 +149,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(s.cardId to expectedCardId, s.updatedAt to 0, s.origDelay to "1m", s.delay to "1m", s.randomFactor to 1.0, s.nextAccessInMillis to 100, s.nextAccessAt to baseTime + 100)
         ))
         insert(repo = repo, table = n, rows = listOf(
-            listOf(n.cardId to expectedCardId, n.text to "0")
+            listOf(n.noteId to expectedCardId, n.text to "0")
         ))
 
         //when
@@ -175,7 +175,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(s.cardId to expectedCardId, s.updatedAt to 0, s.origDelay to "1m", s.delay to "1m", s.randomFactor to 1.0, s.nextAccessInMillis to 100, s.nextAccessAt to baseTime + 100)
         ))
         insert(repo = repo, table = n, rows = listOf(
-            listOf(n.cardId to expectedCardId, n.text to "0")
+            listOf(n.noteId to expectedCardId, n.text to "0")
         ))
 
         //when
@@ -239,7 +239,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             createScheduleRecord(cardId = cardIdWithoutOverdue4, nextAccessIn = timeElapsed+2_000),
         ))
         fun createNoteRecord(cardId: Long) =
-            listOf(n.cardId to cardId, n.text to "0")
+            listOf(n.noteId to cardId, n.text to "0")
         insert(repo = repo, table = n, rows = listOf(
             createNoteRecord(cardId = cardIdWithoutOverdue1),
             createNoteRecord(cardId = cardIdWithLargeOverdue),
@@ -305,7 +305,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             createScheduleRecord(cardId = cardId5),
         ))
         fun createNoteRecord(cardId: Long) =
-            listOf(n.cardId to cardId, n.text to "0")
+            listOf(n.noteId to cardId, n.text to "0")
         insert(repo = repo, table = n, rows = listOf(
             createNoteRecord(cardId = cardId1),
             createNoteRecord(cardId = cardId2),
@@ -347,7 +347,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             createScheduleRecord(cardId = expectedCardId, nextAccessIn = (timeElapsed + 2*MILLIS_IN_HOUR + 3*MILLIS_IN_MINUTE + 39*MILLIS_IN_SECOND).toInt()),
         ))
         fun createNoteRecord(cardId: Long) =
-            listOf(n.cardId to cardId, n.text to "0")
+            listOf(n.noteId to cardId, n.text to "0")
         insert(repo = repo, table = n, rows = listOf(
             createNoteRecord(cardId = expectedCardId),
         ))
@@ -390,7 +390,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(s.cardId to expectedNoteCardId, s.updatedAt to 0, s.origDelay to "1m", s.delay to "1m", s.randomFactor to 1.0, s.nextAccessInMillis to 100, s.nextAccessAt to baseTime + 100)
         ))
         insert(repo = repo, table = n, rows = listOf(
-            listOf(n.cardId to expectedNoteCardId, n.text to "0")
+            listOf(n.noteId to expectedNoteCardId, n.text to "0")
         ))
 
         insert(repo = repo, table = c, rows = listOf(
@@ -491,7 +491,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         val card3 = createCard(cardId = 3L, tagIds = listOf(tagId2, tagId3))
 
         //when
-        val foundCards = dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs())
+        val foundCards = dm.readNotesByFilter(ReadNotesByFilterArgs())
 
         //then
         assertSearchResult(listOf(card1, card2, card3), foundCards)
@@ -513,7 +513,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by 0 tags - all cards are returned
         assertSearchResult(
             listOf(card1, card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf()
             ))
         )
@@ -521,7 +521,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by one tag
         assertSearchResult(
             listOf(card1, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId2)
             ))
         )
@@ -529,7 +529,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by two tags
         assertSearchResult(
             listOf(card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId3, tagId2)
             ))
         )
@@ -537,7 +537,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by three tags - empty result
         assertSearchResult(
             listOf(),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId1, tagId2, tagId3)
             ))
         )
@@ -545,7 +545,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by three tags - non-empty result
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId4, tagId5, tagId6)
             ))
         )
@@ -567,7 +567,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by 0 tags - all cards are returned
         assertSearchResult(
             listOf(card1, card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf()
             ))
         )
@@ -575,7 +575,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by one tag
         assertSearchResult(
             listOf(card1, card2, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf(tagId3)
             ))
         )
@@ -583,7 +583,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by two tags
         assertSearchResult(
             listOf(card2, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf(tagId3, tagId2)
             ))
         )
@@ -591,7 +591,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
         //search by three tags - non-empty result
         assertSearchResult(
             listOf(card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToExclude = setOf(tagId1, tagId2, tagId4)
             ))
         )
@@ -612,7 +612,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 tagIdsToInclude = setOf(tagId2, tagId3),
                 tagIdsToExclude = setOf(tagId4, tagId5),
             ))
@@ -628,14 +628,14 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = false
             ))
         )
 
         assertSearchResult(
             listOf(card2, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = true
             ))
         )
@@ -650,8 +650,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                textToTranslateContains = "Bc"
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                textContains = "Bc"
             ))
         )
     }
@@ -665,9 +665,9 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = false,
-                textToTranslateContains = "Bc"
+                textContains = "Bc"
             ))
         )
     }
@@ -689,9 +689,9 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card6),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 paused = true,
-                textToTranslateContains = "Bc",
+                textContains = "Bc",
                 tagIdsToInclude = setOf(tagId1,tagId2),
                 tagIdsToExclude = setOf(tagId3)
             ))
@@ -708,7 +708,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 textToTranslateLengthLessThan = 4
             ))
         )
@@ -724,7 +724,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 textToTranslateLengthGreaterThan = 4
             ))
         )
@@ -740,7 +740,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 textToTranslateLengthGreaterThan = 3,
                 textToTranslateLengthLessThan = 5,
             ))
@@ -756,7 +756,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationContains = "Bc"
             ))
         )
@@ -772,7 +772,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationLengthLessThan = 4
             ))
         )
@@ -788,7 +788,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationLengthGreaterThan = 4
             ))
         )
@@ -804,7 +804,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 translationLengthGreaterThan = 3,
                 translationLengthLessThan = 5,
             ))
@@ -821,7 +821,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3, card4, card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 createdFrom = 3
             ))
         )
@@ -837,7 +837,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 createdTill = 3
             ))
         )
@@ -853,7 +853,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 createdFrom = 2,
                 createdTill = 4
             ))
@@ -880,7 +880,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3, card4, card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card3.schedule.nextAccessAt
             )),
             skipTimeSinceLastCheck = true,
@@ -889,7 +889,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card4, card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card3.schedule.nextAccessAt+1
             )),
             skipTimeSinceLastCheck = true,
@@ -917,7 +917,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2, card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessTill = card3.schedule.nextAccessAt
             )),
             skipTimeSinceLastCheck = true,
@@ -926,7 +926,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1, card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessTill = card3.schedule.nextAccessAt-1
             )),
             skipTimeSinceLastCheck = true,
@@ -954,7 +954,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2, card3, card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card2.schedule.nextAccessAt,
                 nextAccessTill = card4.schedule.nextAccessAt,
             )),
@@ -964,7 +964,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 nextAccessFrom = card2.schedule.nextAccessAt+1,
                 nextAccessTill = card4.schedule.nextAccessAt-1,
             )),
@@ -983,7 +983,7 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
                 overdueGreaterEq = 0.0
             ))
         )
@@ -999,16 +999,16 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 sortDir = SortDirection.ASC
             )),
             matchOrder = true
@@ -1016,8 +1016,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card5,card4,card3,card2,card1),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 sortDir = SortDirection.DESC
             )),
             matchOrder = true
@@ -1025,16 +1025,16 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card2,card5,card4,card1,card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.TIME_CREATED
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.TIME_CREATED
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             listOf(card2,card5,card4,card1,card3),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.TIME_CREATED,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.TIME_CREATED,
                 sortDir = SortDirection.ASC
             )),
             matchOrder = true
@@ -1042,8 +1042,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card3,card1,card4,card5,card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.TIME_CREATED,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.TIME_CREATED,
                 sortDir = SortDirection.DESC
             )),
             matchOrder = true
@@ -1057,16 +1057,16 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             cardsSortedByNextAccessAtAsc,
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.NEXT_ACCESS_AT
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.NEXT_ACCESS_AT
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             cardsSortedByNextAccessAtAsc,
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.NEXT_ACCESS_AT,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.NEXT_ACCESS_AT,
                 sortDir = SortDirection.ASC
             )),
             matchOrder = true
@@ -1074,8 +1074,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             cardsSortedByNextAccessAtAsc.reversed(),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.NEXT_ACCESS_AT,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.NEXT_ACCESS_AT,
                 sortDir = SortDirection.DESC
             )),
             matchOrder = true
@@ -1092,16 +1092,16 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE
             )),
             matchOrder = true
         )
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 100
             )),
             matchOrder = true
@@ -1109,8 +1109,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4,card5),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 5
             )),
             matchOrder = true
@@ -1118,8 +1118,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2,card3,card4),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 4
             )),
             matchOrder = true
@@ -1127,8 +1127,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1,card2),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 2
             )),
             matchOrder = true
@@ -1136,8 +1136,8 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
 
         assertSearchResult(
             listOf(card1),
-            dm.readTranslateCardsByFilter(ReadTranslateCardsByFilterArgs(
-                sortBy = TranslateCardSortBy.OVERDUE,
+            dm.readNotesByFilter(ReadNotesByFilterArgs(
+                sortBy = NoteSortBy.OVERDUE,
                 rowsLimit = 1
             )),
             matchOrder = true
@@ -1145,13 +1145,13 @@ class ReadNoteCardInstrumentedUnitTest: InstrumentedTestBase() {
     }
 
     private fun assertSearchResult(
-        expected: List<TranslateCard>,
-        actual: BeRespose<ReadTranslateCardsByFilterResp>,
+        expected: List<Note>,
+        actual: BeRespose<ReadNotesByFilterResp>,
         matchOrder:Boolean = false,
         skipTimeSinceLastCheck: Boolean = false,
         skipOverdue: Boolean = false,
     ) {
-        val actualCardsList = actual.data!!.cards
+        val actualCardsList = actual.data!!.notes
         assertEquals(expected.size, actualCardsList.size)
         var cnt = 0
         if (matchOrder) {

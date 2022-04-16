@@ -11,17 +11,12 @@ import org.igye.taggednotes.database.tables.*
 class Repository(
     context: Context,
     val dbName: String?,
-    val cards: CardsTable,
-    val cardsSchedule: CardsScheduleTable,
-    val translationCards: TranslationCardsTable,
-    val translationCardsLog: TranslationCardsLogTable,
+    val objs: ObjectsTable,
     val tags: TagsTable,
-    val cardToTag: CardToTagTable,
-    val noteCards: NoteCardsTable
+    val objToTag: ObjectToTagTable,
+    val notes: NotesTable
 ) : SQLiteOpenHelper(context, dbName, null, DATABASE_VERSION) {
-    private val allTables = listOf(
-        cards, cardsSchedule, tags, cardToTag, translationCards, translationCardsLog, noteCards
-    )
+    private val allTables = listOf(objs, tags, objToTag, notes)
 
     override fun onCreate(db: SQLiteDatabase) {
         db.transaction {
@@ -61,181 +56,12 @@ class Repository(
     }
 
     private fun incVersion(db: SQLiteDatabase, oldVersion: Int) {
-        if (oldVersion == 1) {
-            upgradeFromV1ToV2(db)
-        } else if (oldVersion == 2) {
-            upgradeFromV2ToV3(db)
-        } else {
-            throw TaggedNotesException(
-                msg = "Upgrade for a database of version $oldVersion is not implemented.",
-                errCode = ErrorCode.UPGRADE_IS_NOT_IMPLEMENTED
-            )
-        }
-    }
-
-    private fun upgradeFromV1ToV2(db: SQLiteDatabase) {
-        db.execSQL("""
-                ALTER TABLE $cards ADD COLUMN ${cards.paused} integer not null check (${cards.paused} in (0,1)) default 0
-        """.trimIndent())
-        db.execSQL("""
-                ALTER TABLE $cards ADD COLUMN ${cards.lastCheckedAt} integer not null default 1641594003597
-        """.trimIndent())
-        tags.create(db)
-        cardToTag.create(db)
-
-        recreateTable(
-            db = db,
-            tableName = cards.ver.tableName,
-            createTableBody = """ (
-                            ${cards.ver.verId} integer primary key autoincrement,
-                            ${cards.ver.timestamp} integer not null,
-                            ${cards.id} integer not null,
-                            ${cards.type} integer not null,
-                            ${cards.createdAt} integer not null
-                        ) """.trimIndent(),
-            oldColumnNames = listOf(
-                cards.ver.verId,
-                cards.ver.timestamp,
-                cards.id,
-                cards.type,
-                cards.createdAt,
-            )
-        )
-
-        recreateTable(
-            db = db,
-            tableName = cardsSchedule.ver.tableName,
-            createTableBody = """ (
-                            ${cardsSchedule.ver.verId} integer primary key autoincrement,
-                            ${cardsSchedule.ver.timestamp} integer not null,
-                            ${cardsSchedule.cardId} integer not null,
-                            ${cardsSchedule.updatedAt} integer not null,
-                            ${cardsSchedule.delay} text not null,
-                            ${cardsSchedule.randomFactor} real not null,
-                            ${cardsSchedule.nextAccessInMillis} integer not null,
-                            ${cardsSchedule.nextAccessAt} integer not null
-                        ) """.trimIndent(),
-            oldColumnNames = listOf(
-                cardsSchedule.ver.verId,
-                cardsSchedule.ver.timestamp,
-                cardsSchedule.cardId,
-                cardsSchedule.updatedAt,
-                cardsSchedule.delay,
-                cardsSchedule.randomFactor,
-                cardsSchedule.nextAccessInMillis,
-                cardsSchedule.nextAccessAt,
-            )
-        )
-
-        recreateTable(
-            db = db,
-            tableName = translationCards.ver.tableName,
-            createTableBody = """ (
-                    ${translationCards.ver.verId} integer primary key autoincrement,
-                    ${translationCards.ver.timestamp} integer not null,
-                    ${translationCards.cardId} integer not null,
-                    ${translationCards.textToTranslate} text not null,
-                    ${translationCards.translation} text not null
-                ) """.trimIndent(),
-            oldColumnNames = listOf(
-                translationCards.ver.verId,
-                translationCards.ver.timestamp,
-                translationCards.cardId,
-                translationCards.textToTranslate,
-                translationCards.translation,
-            )
-        )
-
-        recreateTable(
-            db = db,
-            tableName = translationCardsLog.tableName,
-            createTableBody = """ (
-                    ${translationCardsLog.recId} integer primary key autoincrement,
-                    ${translationCardsLog.timestamp} integer not null,
-                    ${translationCardsLog.cardId} integer not null,
-                    ${translationCardsLog.translation} text not null,
-                    ${translationCardsLog.matched} integer not null check (${translationCardsLog.matched} in (0,1))
-                ) """.trimIndent(),
-            oldColumnNames = listOf(
-                translationCardsLog.recId,
-                translationCardsLog.timestamp,
-                translationCardsLog.cardId,
-                translationCardsLog.translation,
-                translationCardsLog.matched,
-            ),
-            reconstructIndexes = listOf(
-                "CREATE INDEX IDX_${translationCardsLog}_CARD_ID on $translationCardsLog ( ${translationCardsLog.cardId}, ${translationCardsLog.timestamp} desc )"
-            )
-        )
-
-    }
-
-    private fun upgradeFromV2ToV3(db: SQLiteDatabase) {
-        noteCards.create(db)
-
-        db.execSQL("""
-                ALTER TABLE $cardsSchedule ADD COLUMN ${cardsSchedule.origDelay} text
-        """.trimIndent())
-        db.execSQL("""
-                update $cardsSchedule set ${cardsSchedule.origDelay} = '-' where ${cardsSchedule.origDelay} is null
-        """.trimIndent())
-        recreateTable(
-            db = db,
-            tableName = cardsSchedule.tableName,
-            createTableBody = """ (
-                            ${cardsSchedule.cardId} integer unique references $cards(${cards.id}) on update restrict on delete restrict,
-                            ${cardsSchedule.updatedAt} integer not null,
-                            ${cardsSchedule.origDelay} text not null,
-                            ${cardsSchedule.delay} text not null,
-                            ${cardsSchedule.randomFactor} real not null,
-                            ${cardsSchedule.nextAccessInMillis} integer not null,
-                            ${cardsSchedule.nextAccessAt} integer not null
-                        ) """.trimIndent(),
-            oldColumnNames = listOf(
-                cardsSchedule.cardId,
-                cardsSchedule.updatedAt,
-                cardsSchedule.origDelay,
-                cardsSchedule.delay,
-                cardsSchedule.randomFactor,
-                cardsSchedule.nextAccessInMillis,
-                cardsSchedule.nextAccessAt,
-            )
-        )
-
-
-        db.execSQL("""
-                ALTER TABLE ${cardsSchedule.ver} ADD COLUMN ${cardsSchedule.origDelay} text
-        """.trimIndent())
-        db.execSQL("""
-                update ${cardsSchedule.ver} set ${cardsSchedule.origDelay} = '-' where ${cardsSchedule.origDelay} is null
-        """.trimIndent())
-        recreateTable(
-            db = db,
-            tableName = cardsSchedule.ver.tableName,
-            createTableBody = """ (
-                    ${cardsSchedule.ver.verId} integer primary key autoincrement,
-                    ${cardsSchedule.ver.timestamp} integer not null,
-                    ${cardsSchedule.cardId} integer not null,
-                    ${cardsSchedule.updatedAt} integer not null,
-                    ${cardsSchedule.origDelay} text not null,
-                    ${cardsSchedule.delay} text not null,
-                    ${cardsSchedule.randomFactor} real not null,
-                    ${cardsSchedule.nextAccessInMillis} integer not null,
-                    ${cardsSchedule.nextAccessAt} integer not null
-                ) """.trimIndent(),
-            oldColumnNames = listOf(
-                cardsSchedule.ver.verId,
-                cardsSchedule.ver.timestamp,
-                cardsSchedule.cardId,
-                cardsSchedule.updatedAt,
-                cardsSchedule.origDelay,
-                cardsSchedule.delay,
-                cardsSchedule.randomFactor,
-                cardsSchedule.nextAccessInMillis,
-                cardsSchedule.nextAccessAt,
-            )
+        throw TaggedNotesException(
+            msg = "Upgrade for a database of version $oldVersion is not implemented.",
+            errCode = ErrorCode.UPGRADE_IS_NOT_IMPLEMENTED
         )
     }
+
 
     /**
      * https://www.sqlite.org/lang_altertable.html
@@ -296,7 +122,7 @@ class Repository(
     }
 
     companion object {
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 1
     }
 }
 

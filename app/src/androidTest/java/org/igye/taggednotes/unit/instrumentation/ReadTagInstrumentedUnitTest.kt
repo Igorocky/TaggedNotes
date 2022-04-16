@@ -63,15 +63,15 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val cardId3 = createCard(cardId = 3L).id
 
         insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.cardId to cardId1, ctg.tagId to tagId1),
-            listOf(ctg.cardId to cardId2, ctg.tagId to tagId1),
-            listOf(ctg.cardId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.cardId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.cardId to cardId1, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId1, ctg.tagId to tagId1),
+            listOf(ctg.objId to cardId2, ctg.tagId to tagId1),
+            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
+            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
         ))
 
         //when
-        val mapping = dm.getCardToTagMapping().data!!
+        val mapping = dm.getObjToTagMapping().data!!
 
         //then
         Assert.assertEquals(3, mapping.size)
@@ -91,16 +91,16 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val cardId3 = createCard(cardId = 3L).id
 
         insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.cardId to cardId1, ctg.tagId to tagId1),
-            listOf(ctg.cardId to cardId2, ctg.tagId to tagId1),
-            listOf(ctg.cardId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.cardId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.cardId to cardId1, ctg.tagId to tagId2),
-            listOf(ctg.cardId to cardId3, ctg.tagId to tagId3),
+            listOf(ctg.objId to cardId1, ctg.tagId to tagId1),
+            listOf(ctg.objId to cardId2, ctg.tagId to tagId1),
+            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
+            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId3, ctg.tagId to tagId3),
         ))
 
         //when
-        val mapping = dm.getCardToTagMapping().data!!
+        val mapping = dm.getObjToTagMapping().data!!
 
         //then
         Assert.assertEquals(3, mapping.size)
@@ -120,15 +120,15 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val cardId3 = createCard(cardId = 3L).id
 
         insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.cardId to cardId2, ctg.tagId to tagId1),
-            listOf(ctg.cardId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.cardId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.cardId to cardId1, ctg.tagId to tagId2),
-            listOf(ctg.cardId to cardId3, ctg.tagId to tagId3),
+            listOf(ctg.objId to cardId2, ctg.tagId to tagId1),
+            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
+            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId3, ctg.tagId to tagId3),
         ))
 
         //when
-        val mapping = dm.getCardToTagMapping().data!!
+        val mapping = dm.getObjToTagMapping().data!!
 
         //then
         Assert.assertEquals(3, mapping.size)
@@ -148,15 +148,15 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val cardId3 = createCard(cardId = 3L).id
 
         insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.cardId to cardId1, ctg.tagId to tagId1),
-            listOf(ctg.cardId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.cardId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.cardId to cardId3, ctg.tagId to tagId3),
-            listOf(ctg.cardId to cardId1, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId1, ctg.tagId to tagId1),
+            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
+            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
+            listOf(ctg.objId to cardId3, ctg.tagId to tagId3),
+            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
         ))
 
         //when
-        val mapping = dm.getCardToTagMapping().data!!
+        val mapping = dm.getObjToTagMapping().data!!
 
         //then
         Assert.assertEquals(3, mapping.size)

@@ -8,7 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class CreateTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
+class CreateNoteInstrumentedUnitTest: InstrumentedTestBase() {
 
     @Test
     fun createTranslateCard_saves_new_translate_card_without_tags() {
@@ -18,10 +18,10 @@ class CreateTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val time1 = testClock.currentMillis()
 
         //when
-        val translateCardId = dm.createTranslateCard(
-            CreateTranslateCardArgs(textToTranslate = " $expectedTextToTranslate\t", translation = "  \t$expectedTranslation    \t  ")
+        val translateCardId = dm.createNote(
+            CreateNoteArgs(text = " $expectedTextToTranslate\t", translation = "  \t$expectedTranslation    \t  ")
         ).data!!
-        val translateCard = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = translateCardId)).data!!
+        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
 
         //then
         assertEquals(expectedTextToTranslate, translateCard.textToTranslate)
@@ -61,14 +61,14 @@ class CreateTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val tagId2 = dm.createTag(CreateTagArgs("t2")).data!!
 
         //when
-        val translateCardId = dm.createTranslateCard(
-            CreateTranslateCardArgs(
-                textToTranslate = " $expectedTextToTranslate\t",
+        val translateCardId = dm.createNote(
+            CreateNoteArgs(
+                text = " $expectedTextToTranslate\t",
                 translation = "  \t$expectedTranslation    \t  ",
                 tagIds = setOf(tagId1, tagId2)
             )
         ).data!!
-        val translateCard = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = translateCardId)).data!!
+        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
 
         //then
         assertEquals(expectedTextToTranslate, translateCard.textToTranslate)
@@ -87,8 +87,8 @@ class CreateTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(tg.id to tagId2, tg.createdAt to time1, tg.name to "t2"),
         ))
         assertTableContent(repo = repo, table = ctg, expectedRows = listOf(
-            listOf(ctg.cardId to translateCardId, ctg.tagId to tagId1),
-            listOf(ctg.cardId to translateCardId, ctg.tagId to tagId2),
+            listOf(ctg.objId to translateCardId, ctg.tagId to tagId1),
+            listOf(ctg.objId to translateCardId, ctg.tagId to tagId2),
         ))
 
         assertTableContent(repo = repo, table = t, matchColumn = t.cardId, expectedRows = listOf(
@@ -110,13 +110,13 @@ class CreateTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val time1 = testClock.currentMillis()
 
         //when
-        val translateCardId = dm.createTranslateCard(
-            CreateTranslateCardArgs(
-                textToTranslate = "a",
+        val translateCardId = dm.createNote(
+            CreateNoteArgs(
+                text = "a",
                 translation = "b",
             )
         ).data!!
-        val translateCard = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = translateCardId)).data!!
+        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
 
         //then
         assertFalse(translateCard.paused)
@@ -132,14 +132,14 @@ class CreateTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val time1 = testClock.currentMillis()
 
         //when
-        val translateCardId = dm.createTranslateCard(
-            CreateTranslateCardArgs(
-                textToTranslate = "a",
+        val translateCardId = dm.createNote(
+            CreateNoteArgs(
+                text = "a",
                 translation = "b",
                 paused = false
             )
         ).data!!
-        val translateCard = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = translateCardId)).data!!
+        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
 
         //then
         assertFalse(translateCard.paused)
@@ -155,14 +155,14 @@ class CreateTranslateCardInstrumentedUnitTest: InstrumentedTestBase() {
         val time1 = testClock.currentMillis()
 
         //when
-        val translateCardId = dm.createTranslateCard(
-            CreateTranslateCardArgs(
-                textToTranslate = "a",
+        val translateCardId = dm.createNote(
+            CreateNoteArgs(
+                text = "a",
                 translation = "b",
                 paused = true
             )
         ).data!!
-        val translateCard = dm.readTranslateCardById(ReadTranslateCardByIdArgs(cardId = translateCardId)).data!!
+        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
 
         //then
         assertTrue(translateCard.paused)

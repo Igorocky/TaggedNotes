@@ -54,7 +54,7 @@ class DeleteTagInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(c.id to 1, c.createdAt to 1000, c.type to TR_TP)
         ))
         insert(repo = repo, table = ctg, rows = listOf(
-            listOf(ctg.cardId to 1, ctg.tagId to 1)
+            listOf(ctg.objId to 1, ctg.tagId to 1)
         ))
 
         //when

@@ -32,7 +32,7 @@ class TagsTable(private val clock: Clock): Table(tableName = "TAGS") {
                 val currTime = clock.instant().toEpochMilli()
                 stmt.bindLong(1, currTime)
                 stmt.bindString(2, name)
-                return Utils.executeInsert(self, stmt)
+                return Utils.executeInsert(stmt)
             }
         }
         update = object : UpdateStmt {
@@ -40,7 +40,7 @@ class TagsTable(private val clock: Clock): Table(tableName = "TAGS") {
             override fun invoke(id: Long, name: String): Int {
                 stmt.bindString(1, name)
                 stmt.bindLong(2, id)
-                return Utils.executeUpdateDelete(self, stmt, 1)
+                return Utils.executeUpdateDelete(stmt, 1)
             }
 
         }
@@ -48,7 +48,7 @@ class TagsTable(private val clock: Clock): Table(tableName = "TAGS") {
             private val stmt = db.compileStatement("delete from $self where $id = ?")
             override fun invoke(id:Long): Int {
                 stmt.bindLong(1, id)
-                return Utils.executeUpdateDelete(self, stmt, 1)
+                return Utils.executeUpdateDelete(stmt, 1)
             }
         }
     }

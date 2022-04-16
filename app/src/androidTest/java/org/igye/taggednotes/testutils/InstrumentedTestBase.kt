@@ -6,12 +6,12 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.igye.taggednotes.ErrorCode.ERROR_IN_TEST
 import org.igye.taggednotes.common.TaggedNotesException
 import org.igye.taggednotes.common.Utils
-import org.igye.taggednotes.database.CardType
+import org.igye.taggednotes.database.ObjectType
 import org.igye.taggednotes.database.Repository
 import org.igye.taggednotes.database.Table
 import org.igye.taggednotes.database.tables.*
 import org.igye.taggednotes.dto.domain.CardSchedule
-import org.igye.taggednotes.dto.domain.TranslateCard
+import org.igye.taggednotes.dto.domain.Note
 import org.igye.taggednotes.manager.DataManager
 import org.igye.taggednotes.manager.RepositoryManager
 import org.igye.taggednotes.manager.SettingsManager
@@ -23,17 +23,17 @@ import kotlin.random.Random
 open class InstrumentedTestBase {
     protected val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     protected val testClock = TestClock(1000)
-    protected val TR_TP = CardType.TRANSLATION.intValue
-    protected val NC_TP = CardType.NOTE.intValue
+    protected val TR_TP = ObjectType.TRANSLATION.intValue
+    protected val NC_TP = ObjectType.NOTE.intValue
 
     protected lateinit var dm: DataManager
     protected lateinit var sm: SettingsManager
     protected lateinit var repo: Repository
-    protected lateinit var c: CardsTable
+    protected lateinit var c: ObjectsTable
     protected lateinit var tg: TagsTable
-    protected lateinit var ctg: CardToTagTable
+    protected lateinit var ctg: ObjectToTagTable
     protected lateinit var t: TranslationCardsTable
-    protected lateinit var n: NoteCardsTable
+    protected lateinit var n: NotesTable
     protected lateinit var s: CardsScheduleTable
     protected lateinit var l: TranslationCardsLogTable
 
@@ -43,13 +43,13 @@ open class InstrumentedTestBase {
         dm = createInmemoryDataManager()
         repo = dm.getRepo()
 
-        c = repo.cards
+        c = repo.objs
         s = repo.cardsSchedule
         tg = repo.tags
-        ctg = repo.cardToTag
+        ctg = repo.objToTag
         t = repo.translationCards
         l = repo.translationCardsLog
-        n = repo.noteCards
+        n = repo.notes
 
         testClock.setFixedTime(Random.nextLong(from = 1000L, until = 10_000L))
     }
@@ -95,7 +95,7 @@ open class InstrumentedTestBase {
         return tagId
     }
 
-    protected fun createTranslateCard(card: TranslateCard): Long {
+    protected fun createTranslateCard(card: Note): Long {
         insert(repo = repo, table = c, rows = listOf(
             listOf(c.id to card.id, c.createdAt to card.createdAt, c.type to TR_TP, c.paused to if (card.paused) 1 else 0, c.lastCheckedAt to card.timeSinceLastCheck.toLong())
         ))
@@ -115,20 +115,20 @@ open class InstrumentedTestBase {
         ))
         card.tagIds.forEach {
             insert(repo = repo, table = ctg, rows = listOf(
-                listOf(ctg.cardId to card.id, ctg.tagId to it)
+                listOf(ctg.objId to card.id, ctg.tagId to it)
             ))
         }
         return card.id
     }
 
-    protected fun createCard(cardId: Long, tagIds: List<Long> = emptyList(), mapper: (TranslateCard) -> TranslateCard = {it}): TranslateCard {
+    protected fun createCard(cardId: Long, tagIds: List<Long> = emptyList(), mapper: (Note) -> Note = {it}): Note {
         val createdAt = 1000 * cardId + 1
         val updatedAt = 10000 * cardId + 1
         val currTime = testClock.currentMillis()
         val lastCheckedAt = currTime - Utils.MILLIS_IN_HOUR*cardId - Utils.MILLIS_IN_MINUTE*cardId
         val nextAccessInMillis = Utils.MILLIS_IN_HOUR * cardId + 2
         val modifiedCard = mapper(
-            TranslateCard(
+            Note(
                 id = cardId,
                 createdAt = createdAt,
                 paused = false,
@@ -162,8 +162,8 @@ open class InstrumentedTestBase {
     }
 
     protected fun assertTranslateCardsEqual(
-        expected: TranslateCard,
-        actual: TranslateCard,
+        expected: Note,
+        actual: Note,
         skipTimeSinceLastCheck: Boolean = false,
         skipOverdue: Boolean = false,
     ) {
@@ -281,13 +281,13 @@ open class InstrumentedTestBase {
     }
 
     protected fun createInmemoryDataManager(): DataManager {
-        val cards = CardsTable(clock = testClock)
+        val cards = ObjectsTable(clock = testClock)
         val cardsSchedule = CardsScheduleTable(clock = testClock, cards = cards)
         val translationCards = TranslationCardsTable(clock = testClock, cards = cards)
         val translationCardsLog = TranslationCardsLogTable(clock = testClock)
         val tags = TagsTable(clock = testClock)
-        val cardToTag = CardToTagTable(clock = testClock, cards = cards, tags = tags)
-        val noteCards = NoteCardsTable(clock = testClock, cards = cards)
+        val cardToTag = ObjectToTagTable(clock = testClock, objects = cards, tags = tags)
+        val noteCards = NotesTable(clock = testClock, objs = cards)
 
         return DataManager(
             clock = testClock,
@@ -298,13 +298,13 @@ open class InstrumentedTestBase {
                     Repository(
                         context = appContext,
                         dbName = null,
-                        cards = cards,
+                        objs = cards,
                         cardsSchedule = cardsSchedule,
                         translationCards = translationCards,
                         translationCardsLog = translationCardsLog,
                         tags = tags,
-                        cardToTag = cardToTag,
-                        noteCards = noteCards
+                        objToTag = cardToTag,
+                        notes = noteCards
                     )
                 }
             ),
