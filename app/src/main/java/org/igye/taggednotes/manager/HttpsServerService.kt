@@ -13,8 +13,8 @@ class HttpsServerService: Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val self = this
         Thread {
-            val NOTIFICATION_CHANNEL_ID = "org.igye.MemoryRefresh"
-            val channelName = "MemoryRefresh HTTPS Server"
+            val NOTIFICATION_CHANNEL_ID = "org.igye.TaggedNotes"
+            val channelName = "TaggedNotes HTTPS Server"
             val chan = NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW)
             chan.lightColor = Color.BLUE
             chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
@@ -25,7 +25,7 @@ class HttpsServerService: Service() {
                     PendingIntent.getActivity(self, 0, notificationIntent, 0)
                 }
             val notification: Notification = Notification.Builder(self, NOTIFICATION_CHANNEL_ID)
-                .setContentTitle("MemoryRefresh HTTPS server is running")
+                .setContentTitle("TaggedNotes HTTPS server is running")
                 .setContentText("tap to view details")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentIntent(pendingIntent)

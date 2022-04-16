@@ -4,20 +4,20 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
-import org.igye.taggednotes.config.MemoryRefreshApp
+import org.igye.taggednotes.config.TaggedNotesApp
 
 class MainActivity : WebViewActivity<MainActivityViewModel>() {
     override val viewModel: MainActivityViewModel by viewModels {
-        (application as MemoryRefreshApp).appContainer.viewModelFactory
+        (application as TaggedNotesApp).appContainer.viewModelFactory
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (application as MemoryRefreshApp).appContainer.repositoryManager.shareFile.set { shareFile(it) }
+        (application as TaggedNotesApp).appContainer.repositoryManager.shareFile.set { shareFile(it) }
     }
 
     override fun onDestroy() {
-        (application as MemoryRefreshApp).appContainer.repositoryManager.shareFile.set { null }
+        (application as TaggedNotesApp).appContainer.repositoryManager.shareFile.set { null }
         super.onDestroy()
     }
 

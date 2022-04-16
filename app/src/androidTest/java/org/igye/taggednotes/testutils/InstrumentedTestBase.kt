@@ -4,7 +4,7 @@ import android.database.Cursor
 import android.database.Cursor.*
 import androidx.test.platform.app.InstrumentationRegistry
 import org.igye.taggednotes.ErrorCode.ERROR_IN_TEST
-import org.igye.taggednotes.common.MemoryRefreshException
+import org.igye.taggednotes.common.TaggedNotesException
 import org.igye.taggednotes.common.Utils
 import org.igye.taggednotes.database.CardType
 import org.igye.taggednotes.database.Repository
@@ -276,7 +276,7 @@ open class InstrumentedTestBase {
             FIELD_TYPE_INTEGER -> cursor.getLong(columnIndex)
             FIELD_TYPE_STRING -> cursor.getString(columnIndex)
             FIELD_TYPE_FLOAT -> cursor.getDouble(columnIndex)
-            else -> throw MemoryRefreshException(msg = "Unexpected type '$type'", errCode = ERROR_IN_TEST)
+            else -> throw TaggedNotesException(msg = "Unexpected type '$type'", errCode = ERROR_IN_TEST)
         }
     }
 

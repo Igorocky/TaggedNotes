@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.core.database.sqlite.transaction
 import org.igye.taggednotes.ErrorCode
-import org.igye.taggednotes.common.MemoryRefreshException
+import org.igye.taggednotes.common.TaggedNotesException
 import org.igye.taggednotes.database.tables.*
 
 class Repository(
@@ -31,7 +31,7 @@ class Repository(
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (newVersion < oldVersion) {
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 msg = "Downgrade of the database is not supported.",
                 errCode = ErrorCode.DOWNGRADE_IS_NOT_SUPPORTED
             )
@@ -52,7 +52,7 @@ class Repository(
         super.onOpen(db)
         val actualDbVersion: Int = db.select("PRAGMA user_version") { it.getLong() }.rows[0].toInt()
         if (actualDbVersion != DATABASE_VERSION) {
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 msg = "Database version mismatch: expected $DATABASE_VERSION, actual $actualDbVersion.",
                 errCode = ErrorCode.DATABASE_VERSION_MISMATCH
             )
@@ -66,7 +66,7 @@ class Repository(
         } else if (oldVersion == 2) {
             upgradeFromV2ToV3(db)
         } else {
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 msg = "Upgrade for a database of version $oldVersion is not implemented.",
                 errCode = ErrorCode.UPGRADE_IS_NOT_IMPLEMENTED
             )

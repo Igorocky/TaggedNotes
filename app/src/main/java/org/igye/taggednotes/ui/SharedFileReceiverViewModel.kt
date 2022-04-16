@@ -5,7 +5,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import org.igye.taggednotes.ErrorCode
 import org.igye.taggednotes.common.BeMethod
-import org.igye.taggednotes.common.MemoryRefreshException
+import org.igye.taggednotes.common.TaggedNotesException
 import org.igye.taggednotes.common.Utils
 import org.igye.taggednotes.dto.common.BeErr
 import org.igye.taggednotes.dto.common.BeRespose
@@ -63,7 +63,7 @@ class SharedFileReceiverViewModel(appContext: Context, beThreadPool: ExecutorSer
         } else if (fileName.endsWith(".zip")) {
             SharedFileType.BACKUP
         } else {
-            throw MemoryRefreshException(msg = "unsupported file type.", errCode = ErrorCode.UNSUPPORTED_FILE_TYPE)
+            throw TaggedNotesException(msg = "unsupported file type.", errCode = ErrorCode.UNSUPPORTED_FILE_TYPE)
         }
     }
 

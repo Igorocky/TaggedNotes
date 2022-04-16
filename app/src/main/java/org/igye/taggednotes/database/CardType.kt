@@ -1,7 +1,7 @@
 package org.igye.taggednotes.database
 
 import org.igye.taggednotes.ErrorCode
-import org.igye.taggednotes.common.MemoryRefreshException
+import org.igye.taggednotes.common.TaggedNotesException
 
 enum class CardType(val intValue: Long) {
     TRANSLATION(intValue = 1),
@@ -14,7 +14,7 @@ enum class CardType(val intValue: Long) {
                     return value
                 }
             }
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 msg = "Unexpected CardType code of '$intValue'",
                 errCode = ErrorCode.UNEXPECTED_CARD_TYPE_CODE
             )

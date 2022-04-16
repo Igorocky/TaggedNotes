@@ -22,7 +22,7 @@ class DataManagerInstrumentedIntTest: InstrumentedTestBase() {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("org.igye.memoryrefresh.dev", appContext.packageName)
+        assertEquals("org.igye.taggednotes.dev", appContext.packageName)
     }
 
     @Test

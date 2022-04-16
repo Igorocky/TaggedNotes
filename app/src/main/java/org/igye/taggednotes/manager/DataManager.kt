@@ -3,7 +3,7 @@ package org.igye.taggednotes.manager
 import android.database.sqlite.SQLiteConstraintException
 import org.igye.taggednotes.ErrorCode.*
 import org.igye.taggednotes.common.BeMethod
-import org.igye.taggednotes.common.MemoryRefreshException
+import org.igye.taggednotes.common.TaggedNotesException
 import org.igye.taggednotes.common.Utils
 import org.igye.taggednotes.common.Utils.delayStrToMillis
 import org.igye.taggednotes.common.Utils.multiplyDelay
@@ -46,7 +46,7 @@ class DataManager(
                 errCode = SAVE_NEW_TAG,
                 errHandler = { ex ->
                     if (ex is SQLiteConstraintException && (ex.message?:"").contains("UNIQUE constraint failed: TAGS.NAME")) {
-                        throw MemoryRefreshException(
+                        throw TaggedNotesException(
                             errCode = SAVE_NEW_TAG_NAME_IS_NOT_UNIQUE,
                             msg = "A tag with name '$name' already exists."
                         )
@@ -119,7 +119,7 @@ class DataManager(
                 errCode = UPDATE_TAG,
                 errHandler = { ex ->
                     throw if (ex is SQLiteConstraintException && (ex.message?:"").contains("UNIQUE constraint failed: TAGS.NAME")) {
-                        MemoryRefreshException(
+                        TaggedNotesException(
                             errCode = UPDATE_TAG_NAME_IS_NOT_UNIQUE,
                             msg = "A tag with name '$newName' already exists."
                         )
@@ -147,7 +147,7 @@ class DataManager(
             errCode = DELETE_TAG,
             errHandler = { ex ->
                 throw if (ex is SQLiteConstraintException && (ex.message?:"").contains("FOREIGN KEY constraint failed")) {
-                    MemoryRefreshException(
+                    TaggedNotesException(
                         errCode = DELETE_TAG_TAG_IS_USED,
                         msg = "Cannot delete tag because it is referenced by at least one card."
                     )
@@ -527,9 +527,9 @@ class DataManager(
                 val newTextToTranslate = args.textToTranslate?.trim()?:existingTextToTranslate
                 val newTranslation = args.translation?.trim()?:existingTranslation
                 if (newTextToTranslate.isEmpty()) {
-                    throw MemoryRefreshException(errCode = UPDATE_TRANSLATE_CARD_TEXT_TO_TRANSLATE_IS_EMPTY, msg = "Text to translate should not be empty.")
+                    throw TaggedNotesException(errCode = UPDATE_TRANSLATE_CARD_TEXT_TO_TRANSLATE_IS_EMPTY, msg = "Text to translate should not be empty.")
                 } else if (newTranslation.isEmpty()) {
-                    throw MemoryRefreshException(errCode = UPDATE_TRANSLATE_CARD_TRANSLATION_IS_EMPTY, msg = "Translation should not be empty.")
+                    throw TaggedNotesException(errCode = UPDATE_TRANSLATE_CARD_TRANSLATION_IS_EMPTY, msg = "Translation should not be empty.")
                 }
                 if (newTextToTranslate != existingTextToTranslate || newTranslation != existingTranslation) {
                     repo.translationCards.update(cardId = args.cardId, textToTranslate = newTextToTranslate, translation = newTranslation)
@@ -564,7 +564,7 @@ class DataManager(
                 }.rows[0]
                 val newText = args.text?.trim()?:existingText
                 if (newText.isEmpty()) {
-                    throw MemoryRefreshException(errCode = UPDATE_NOTE_CARD_TEXT_IS_EMPTY, msg = "Text should not be empty.")
+                    throw TaggedNotesException(errCode = UPDATE_NOTE_CARD_TEXT_IS_EMPTY, msg = "Text should not be empty.")
                 }
                 if (newText != existingText) {
                     repo.noteCards.update(cardId = args.cardId, text = newText)
@@ -661,7 +661,7 @@ class DataManager(
             val origDelay = delay?.trim()?:existingCard.schedule.origDelay
             var newDelay = delay?.trim()?:existingCard.schedule.delay
             if (newDelay.isEmpty()) {
-                throw MemoryRefreshException(errCode = UPDATE_CARD_DELAY_IS_EMPTY, msg = "Delay should not be empty.")
+                throw TaggedNotesException(errCode = UPDATE_CARD_DELAY_IS_EMPTY, msg = "Delay should not be empty.")
             }
             if (recalculateDelay || newDelay != existingCard.schedule.delay) {
                 if (newDelay.startsWith("x")) {

@@ -37,7 +37,7 @@ object Utils {
                 }
                 .forEach { method ->
                     if (resultMap.containsKey(method.name)) {
-                        throw MemoryRefreshException(
+                        throw TaggedNotesException(
                             msg = "resultMap.containsKey('${method.name}')",
                             errCode = ErrorCode.DUPLICATED_BE_METHOD_NAME
                         )
@@ -148,14 +148,14 @@ object Utils {
     private fun delayStrToMillisInner(pauseDuration: String): Long {
         val matcher = attemptDelayPattern.matcher(pauseDuration)
         if (!matcher.matches()) {
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 msg = "Pause duration '$pauseDuration' is in incorrect format.",
                 errCode = ErrorCode.PAUSE_DURATION_IS_IN_INCORRECT_FORMAT
             )
         }
         var amount = matcher.group(1).toLong()
         if (amount > 365) {
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 msg = "Delay duration of '$amount' is too big.",
                 errCode = ErrorCode.DELAY_DURATION_IS_TOO_BIG
             )
@@ -212,7 +212,7 @@ object Utils {
     fun executeInsert(table: Table, stmt: SQLiteStatement): Long {
         val id = stmt.executeInsert()
         if (id < 0) {
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 errCode = ErrorCode.ERROR_INSERTING_A_RECORD_TO_A_TABLE,
                 msg = "Negative id was returned when inserting a record to $table table."
             )
@@ -224,7 +224,7 @@ object Utils {
     fun executeUpdateDelete(table: Table, stmt: SQLiteStatement, expectedNumberOfRows: Int? = null): Int {
         val count = stmt.executeUpdateDelete()
         if (expectedNumberOfRows != null && count != expectedNumberOfRows) {
-            throw MemoryRefreshException(
+            throw TaggedNotesException(
                 errCode = ErrorCode.ERROR_UPDATING_OR_DELETING_FROM_A_TABLE,
                 msg = "Number of rows updated/deleted from $table doesn't match expected value."
             )
@@ -250,7 +250,7 @@ object Utils {
             "m" -> ChronoUnit.MINUTES
             "h" -> ChronoUnit.HOURS
             "d" -> ChronoUnit.DAYS
-            else -> throw MemoryRefreshException(msg = "Unrecognized time interval unit: $unit", errCode = ErrorCode.UNRECOGNIZED_TIME_INTERVAL_UNIT)
+            else -> throw TaggedNotesException(msg = "Unrecognized time interval unit: $unit", errCode = ErrorCode.UNRECOGNIZED_TIME_INTERVAL_UNIT)
         }
     }
 }

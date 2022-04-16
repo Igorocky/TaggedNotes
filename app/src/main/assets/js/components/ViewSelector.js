@@ -34,7 +34,7 @@ addView({name: FAST_REPEAT_CARDS_VIEW, component: RepeatCardsView, params: {key:
 
 const ViewSelector = ({}) => {
     const [currentViewUrl, setCurrentViewUrl] = useState(null)
-    const [pageTitle, setPageTitle] = useState("MemoryRefresh")
+    const [pageTitle, setPageTitle] = useState("TaggedNotes")
     const [showMoreControlButtons, setShowMoreControlButtons] = useState(false)
 
     const controlsContainer = useRef(null)

@@ -63,7 +63,7 @@ enum class ErrorCode(val code: Long) {
 //    init {
 //        println("values().size = ${values().size}")
 //        if (values().asSequence().map { it.code }.toSet().size != values().size) {
-//            throw MemoryRefreshException("values().asSequence().map { it.code }.toSet().size != values().size")
+//            throw TaggedNotesException("values().asSequence().map { it.code }.toSet().size != values().size")
 //        }
 //    }
 }

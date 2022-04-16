@@ -13,14 +13,14 @@ fun main() {
 }
 
 object Tools {
-    private val DEV_APP_ID = "org.igye.memoryrefresh.dev"
-    private val RELEASE_APP_ID = "org.igye.memoryrefresh"
+    private val DEV_APP_ID = "org.igye.taggednotes.dev"
+    private val RELEASE_APP_ID = "org.igye.taggednotes"
 
-    private val DEV_APP_NAME = "DEV-MemoryRefresh"
-    private val RELEASE_APP_NAME = "MemoryRefresh"
+    private val DEV_APP_NAME = "DEV-TaggedNotes"
+    private val RELEASE_APP_NAME = "TaggedNotes"
 
-    private val DEV_FILE_PROVIDER_NAME = "org.igye.memoryrefresh.fileprovider.dev"
-    private val RELEASE_FILE_PROVIDER_NAME = "org.igye.memoryrefresh.fileprovider"
+    private val DEV_FILE_PROVIDER_NAME = "org.igye.taggednotes.fileprovider.dev"
+    private val RELEASE_FILE_PROVIDER_NAME = "org.igye.taggednotes.fileprovider"
 
     private val DEV_APP_BACKGROUND_COLOR = "<body style=\"background-color: #d5f5e6\">"
     private val RELEASE_APP_BACKGROUND_COLOR = "<body>"
@@ -62,7 +62,7 @@ object Tools {
         val oldVersion = if (isRelease) "1.0" else releaseVersion
         val newVersion = if (isRelease) releaseVersion else "1.0"
         replaceSubstringInFile(
-            file = File("./app/src/main/java/org/igye/memoryrefresh/config/AppContainer.kt"),
+            file = File("./app/src/main/java/org/igye/taggednotes/config/AppContainer.kt"),
             oldValue = "private val appVersion = \"$oldVersion\"",
             newValue = "private val appVersion = \"$newVersion\""
         )
@@ -78,7 +78,7 @@ object Tools {
 
     private fun changeFileProviderName(from:String, to:String) {
         replaceSubstringInFile(File("./app/src/main/AndroidManifest.xml"), from, to)
-        replaceSubstringInFile(File("./app/src/main/java/org/igye/memoryrefresh/manager/RepositoryManager.kt"), from, to)
+        replaceSubstringInFile(File("./app/src/main/java/org/igye/taggednotes/manager/RepositoryManager.kt"), from, to)
     }
 
     private fun changeAppBackgroundColor(from:String, to:String) {
