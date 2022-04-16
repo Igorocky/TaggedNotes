@@ -11,165 +11,73 @@ import org.junit.runner.RunWith
 class CreateNoteInstrumentedUnitTest: InstrumentedTestBase() {
 
     @Test
-    fun createTranslateCard_saves_new_translate_card_without_tags() {
+    fun createNote_saves_new_note_without_tags() {
         //given
-        val expectedTextToTranslate = "A"
-        val expectedTranslation = "a"
+        val expectedText = "A"
         val time1 = testClock.currentMillis()
 
         //when
-        val translateCardId = dm.createNote(
-            CreateNoteArgs(text = " $expectedTextToTranslate\t", translation = "  \t$expectedTranslation    \t  ")
+        val noteId = dm.createNote(
+            CreateNoteArgs(text = " $expectedText\t")
         ).data!!
-        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
+        val note = dm.readNoteById(ReadNoteByIdArgs(noteId = noteId)).data!!
 
         //then
-        assertEquals(expectedTextToTranslate, translateCard.textToTranslate)
-        assertEquals(expectedTranslation, translateCard.translation)
-        assertEquals("1s", translateCard.schedule.delay)
-        assertEquals(1000, translateCard.schedule.nextAccessInMillis)
-        assertEquals(time1+1000, translateCard.schedule.nextAccessAt)
+        assertEquals(expectedText, note.text)
+        assertEquals(time1, note.createdAt)
+        assertTrue(note.tagIds.isEmpty())
 
-        assertTableContent(repo = repo, table = c, matchColumn = c.id, expectedRows = listOf(
-            listOf(c.id to translateCard.id, c.type to TR_TP, c.createdAt to time1, c.paused to 0)
+        assertTableContent(repo = repo, table = o, matchColumn = o.id, expectedRows = listOf(
+            listOf(o.id to note.id, o.type to N_TP, o.createdAt to time1)
         ))
-        assertTableContent(repo = repo, table = c.ver, expectedRows = listOf())
+        assertTableContent(repo = repo, table = o.ver, expectedRows = listOf())
 
         assertTableContent(repo = repo, table = tg, expectedRows = listOf())
-        assertTableContent(repo = repo, table = ctg, expectedRows = listOf())
+        assertTableContent(repo = repo, table = otg, expectedRows = listOf())
 
-        assertTableContent(repo = repo, table = t, matchColumn = t.cardId, expectedRows = listOf(
-            listOf(t.cardId to translateCard.id, t.textToTranslate to expectedTextToTranslate, t.translation to expectedTranslation)
+        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
+            listOf(n.noteId to note.id, n.text to expectedText)
         ))
-        assertTableContent(repo = repo, table = t.ver, expectedRows = listOf())
-
-        assertTableContent(repo = repo, table = s, matchColumn = s.cardId, expectedRows = listOf(
-            listOf(s.cardId to translateCard.id, s.delay to "1s", s.nextAccessInMillis to 1000L, s.nextAccessAt to time1+1000)
-        ))
-        assertTableContent(repo = repo, table = s.ver, expectedRows = listOf())
-
-        assertTableContent(repo = repo, table = l, expectedRows = listOf())
+        assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
     }
 
     @Test
-    fun createTranslateCard_saves_new_translate_card_with_tags() {
+    fun createNote_saves_new_note_with_tags() {
         //given
-        val expectedTextToTranslate = "A"
-        val expectedTranslation = "a"
+        val expectedText = "A"
         val time1 = testClock.currentMillis()
         val tagId1 = dm.createTag(CreateTagArgs("t1")).data!!
         val tagId2 = dm.createTag(CreateTagArgs("t2")).data!!
 
         //when
-        val translateCardId = dm.createNote(
+        val noteId = dm.createNote(
             CreateNoteArgs(
-                text = " $expectedTextToTranslate\t",
-                translation = "  \t$expectedTranslation    \t  ",
+                text = " $expectedText\t",
                 tagIds = setOf(tagId1, tagId2)
             )
         ).data!!
-        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
+        val note = dm.readNoteById(ReadNoteByIdArgs(noteId = noteId)).data!!
 
         //then
-        assertEquals(expectedTextToTranslate, translateCard.textToTranslate)
-        assertEquals(expectedTranslation, translateCard.translation)
-        assertEquals("1s", translateCard.schedule.delay)
-        assertEquals(1000, translateCard.schedule.nextAccessInMillis)
-        assertEquals(time1+1000, translateCard.schedule.nextAccessAt)
+        assertEquals(expectedText, note.text)
 
-        assertTableContent(repo = repo, table = c, matchColumn = c.id, expectedRows = listOf(
-            listOf(c.id to translateCard.id, c.type to TR_TP, c.createdAt to time1)
+        assertTableContent(repo = repo, table = o, matchColumn = o.id, expectedRows = listOf(
+            listOf(o.id to note.id, o.type to N_TP, o.createdAt to time1)
         ))
-        assertTableContent(repo = repo, table = c.ver, expectedRows = listOf())
+        assertTableContent(repo = repo, table = o.ver, expectedRows = listOf())
 
         assertTableContent(repo = repo, table = tg, expectedRows = listOf(
             listOf(tg.id to tagId1, tg.createdAt to time1, tg.name to "t1"),
             listOf(tg.id to tagId2, tg.createdAt to time1, tg.name to "t2"),
         ))
-        assertTableContent(repo = repo, table = ctg, expectedRows = listOf(
-            listOf(ctg.objId to translateCardId, ctg.tagId to tagId1),
-            listOf(ctg.objId to translateCardId, ctg.tagId to tagId2),
+        assertTableContent(repo = repo, table = otg, expectedRows = listOf(
+            listOf(otg.objId to noteId, otg.tagId to tagId1),
+            listOf(otg.objId to noteId, otg.tagId to tagId2),
         ))
 
-        assertTableContent(repo = repo, table = t, matchColumn = t.cardId, expectedRows = listOf(
-            listOf(t.cardId to translateCard.id, t.textToTranslate to expectedTextToTranslate, t.translation to expectedTranslation)
+        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
+            listOf(n.noteId to note.id, n.text to expectedText)
         ))
-        assertTableContent(repo = repo, table = t.ver, expectedRows = listOf())
-
-        assertTableContent(repo = repo, table = s, matchColumn = s.cardId, expectedRows = listOf(
-            listOf(s.cardId to translateCard.id, s.delay to "1s", s.nextAccessInMillis to 1000L, s.nextAccessAt to time1+1000)
-        ))
-        assertTableContent(repo = repo, table = s.ver, expectedRows = listOf())
-
-        assertTableContent(repo = repo, table = l, expectedRows = listOf())
+        assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
     }
-
-    @Test
-    fun createTranslateCard_creates_unpaused_card_if_paused_flag_was_not_specified() {
-        //given
-        val time1 = testClock.currentMillis()
-
-        //when
-        val translateCardId = dm.createNote(
-            CreateNoteArgs(
-                text = "a",
-                translation = "b",
-            )
-        ).data!!
-        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
-
-        //then
-        assertFalse(translateCard.paused)
-
-        assertTableContent(repo = repo, table = c, matchColumn = c.id, expectedRows = listOf(
-            listOf(c.id to translateCard.id, c.type to TR_TP, c.createdAt to time1, c.paused to 0)
-        ))
-    }
-
-    @Test
-    fun createTranslateCard_creates_unpaused_card_if_paused_flag_was_specified_as_false() {
-        //given
-        val time1 = testClock.currentMillis()
-
-        //when
-        val translateCardId = dm.createNote(
-            CreateNoteArgs(
-                text = "a",
-                translation = "b",
-                paused = false
-            )
-        ).data!!
-        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
-
-        //then
-        assertFalse(translateCard.paused)
-
-        assertTableContent(repo = repo, table = c, matchColumn = c.id, expectedRows = listOf(
-            listOf(c.id to translateCard.id, c.type to TR_TP, c.createdAt to time1, c.paused to 0)
-        ))
-    }
-
-    @Test
-    fun createTranslateCard_creates_paused_card_if_paused_flag_was_specified_as_true() {
-        //given
-        val time1 = testClock.currentMillis()
-
-        //when
-        val translateCardId = dm.createNote(
-            CreateNoteArgs(
-                text = "a",
-                translation = "b",
-                paused = true
-            )
-        ).data!!
-        val translateCard = dm.readNoteById(ReadNoteByIdArgs(noteId = translateCardId)).data!!
-
-        //then
-        assertTrue(translateCard.paused)
-
-        assertTableContent(repo = repo, table = c, matchColumn = c.id, expectedRows = listOf(
-            listOf(c.id to translateCard.id, c.type to TR_TP, c.createdAt to time1, c.paused to 1)
-        ))
-    }
-
 }

@@ -328,8 +328,8 @@ class DataManager(
         select
             o.${o.id},
             o.${o.type},
-            c.${o.createdAt},
-            (select group_concat(ctg.${otg.tagId}) from $otg ctg where ctg.${otg.objId} = c.${o.id}) as tagIds
+            o.${o.createdAt},
+            (select group_concat(otg.${otg.tagId}) from $otg otg where otg.${otg.objId} = o.${o.id}) as tagIds
         from 
             $o o
         where o.${o.id} = ?
@@ -371,7 +371,6 @@ class DataManager(
         } else {
             tagsStat.getLeastUsedTagId(tagIdsToInclude)
         }
-        val currTime = clock.instant().toEpochMilli()
         fun havingFilterForTag(tagId:Long, include: Boolean) =
             "max(case when otg.${otg.tagId} = $tagId then 1 else 0 end) = ${if (include) "1" else "0"}"
         fun havingFilterForTags(tagIds:Sequence<Long>, include: Boolean) =
@@ -436,11 +435,8 @@ class DataManager(
 
         return getRepo().readableDatabase.doInTransaction {
             val result = select(query = query, args = queryArgs.toTypedArray()) {
-                val cardId = it.getLong()
-                val updatedAt = it.getLong()
-                val nextAccessAt = it.getLong()
                 Note(
-                    id = cardId,
+                    id = it.getLong(),
                     createdAt = it.getLong(),
                     tagIds = (it.getStringOrNull()?:"").splitToSequence(",").filter { it.isNotBlank() }.map { it.toLong() }.toList(),
                     text = it.getString(),

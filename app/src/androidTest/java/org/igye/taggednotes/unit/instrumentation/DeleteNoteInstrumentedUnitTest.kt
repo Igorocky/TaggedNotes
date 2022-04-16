@@ -4,7 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.igye.taggednotes.manager.DataManager.CreateNoteArgs
 import org.igye.taggednotes.manager.DataManager.DeleteNoteArgs
 import org.igye.taggednotes.testutils.InstrumentedTestBase
-import org.junit.Assert.*
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -12,85 +13,66 @@ import org.junit.runner.RunWith
 class DeleteNoteInstrumentedUnitTest: InstrumentedTestBase() {
 
     @Test
-    fun deleteTranslateCard_deletes_translate_card() {
+    fun deleteNote_deletes_note() {
         //given
-        val expectedTextToTranslate = "A"
-        val expectedTranslation = "a"
+        val expectedText = "A"
         val timeCreated = testClock.currentMillis()
-        val cardId = dm.createNote(
-            CreateNoteArgs(text = expectedTextToTranslate, translation = expectedTranslation)
+        val noteId = dm.createNote(
+            CreateNoteArgs(text = expectedText)
         ).data!!
 
         //when
         val timeDeleted = testClock.plus(1000)
-        val deleteTranslateCardResp = dm.deleteNote(DeleteNoteArgs(noteId = cardId))
+        val deleteNoteResp = dm.deleteNote(DeleteNoteArgs(noteId = noteId))
 
         //then
-        assertNotNull(deleteTranslateCardResp.data!!)
+        assertNotNull(deleteNoteResp.data)
 
-        assertTableContent(repo = repo, table = c, matchColumn = c.id, expectedRows = listOf())
-        assertTableContent(repo = repo, table = c.ver, expectedRows = listOf(
-            listOf(c.ver.timestamp to timeDeleted, c.id to cardId, c.type to TR_TP, c.createdAt to timeCreated)
+        assertTableContent(repo = repo, table = o, matchColumn = o.id, expectedRows = listOf())
+        assertTableContent(repo = repo, table = o.ver, expectedRows = listOf(
+            listOf(o.ver.timestamp to timeDeleted, o.id to noteId, o.type to N_TP, o.createdAt to timeCreated)
         ))
 
-        assertTableContent(repo = repo, table = t, matchColumn = t.cardId, expectedRows = listOf())
-        assertTableContent(repo = repo, table = t.ver, expectedRows = listOf(
-            listOf(t.ver.timestamp to timeDeleted, t.cardId to cardId, t.textToTranslate to expectedTextToTranslate, t.translation to expectedTranslation)
+        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf())
+        assertTableContent(repo = repo, table = n.ver, expectedRows = listOf(
+            listOf(n.ver.timestamp to timeDeleted, n.noteId to noteId, n.text to expectedText)
         ))
-
-        assertTableContent(repo = repo, table = s, matchColumn = s.cardId, expectedRows = listOf())
-        assertTableContent(repo = repo, table = s.ver, expectedRows = listOf(
-            listOf(s.ver.timestamp to timeDeleted, s.cardId to cardId, s.delay to "1s", s.nextAccessInMillis to 1000L, s.nextAccessAt to timeCreated+1000)
-        ))
-
-        assertTableContent(repo = repo, table = l, expectedRows = listOf())
     }
 
     @Test
-    fun deleteTranslateCard_ids_of_deleted_cards_are_not_reused() {
+    fun deleteNote_ids_of_deleted_notes_are_not_reused() {
         //given
-        val expectedTextToTranslate1 = "A"
-        val expectedTranslation1 = "a"
-        val expectedTextToTranslate2 = "B"
-        val expectedTranslation2 = "b"
+        val expectedText1 = "A"
+        val expectedText2 = "B"
         val timeCreated1 = testClock.currentMillis()
-        val cardId1 = dm.createNote(
-            CreateNoteArgs(text = expectedTextToTranslate1, translation = expectedTranslation1)
+        val noteId1 = dm.createNote(
+            CreateNoteArgs(text = expectedText1)
         ).data!!
         val timeDeleted1 = testClock.plus(1000)
-        dm.deleteNote(DeleteNoteArgs(noteId = cardId1))
+        dm.deleteNote(DeleteNoteArgs(noteId = noteId1))
 
         //when
         val timeCreated2 = testClock.plus(1000)
-        val cardId2 = dm.createNote(
-            CreateNoteArgs(text = expectedTextToTranslate2, translation = expectedTranslation2)
+        val noteId2 = dm.createNote(
+            CreateNoteArgs(text = expectedText2)
         ).data!!
 
         //then
-        assertNotEquals(cardId1, cardId2)
+        assertNotEquals(noteId1, noteId2)
 
-        assertTableContent(repo = repo, table = c, matchColumn = c.id, expectedRows = listOf(
-            listOf(c.id to cardId2, c.type to TR_TP, c.createdAt to timeCreated2)
+        assertTableContent(repo = repo, table = o, matchColumn = o.id, expectedRows = listOf(
+            listOf(o.id to noteId2, o.type to N_TP, o.createdAt to timeCreated2)
         ))
-        assertTableContent(repo = repo, table = c.ver, expectedRows = listOf(
-            listOf(c.ver.timestamp to timeDeleted1, c.id to cardId1, c.type to TR_TP, c.createdAt to timeCreated1)
-        ))
-
-        assertTableContent(repo = repo, table = t, matchColumn = t.cardId, expectedRows = listOf(
-            listOf(t.cardId to cardId2, t.textToTranslate to expectedTextToTranslate2, t.translation to expectedTranslation2)
-        ))
-        assertTableContent(repo = repo, table = t.ver, expectedRows = listOf(
-            listOf(t.ver.timestamp to timeDeleted1, t.cardId to cardId1, t.textToTranslate to expectedTextToTranslate1, t.translation to expectedTranslation1)
+        assertTableContent(repo = repo, table = o.ver, expectedRows = listOf(
+            listOf(o.ver.timestamp to timeDeleted1, o.id to noteId1, o.type to N_TP, o.createdAt to timeCreated1)
         ))
 
-        assertTableContent(repo = repo, table = s, matchColumn = s.cardId, expectedRows = listOf(
-            listOf(s.cardId to cardId2, s.updatedAt to timeCreated2, s.delay to "1s", s.nextAccessInMillis to 1000L, s.nextAccessAt to timeCreated2+1000)
+        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
+            listOf(n.noteId to noteId2, n.text to expectedText2)
         ))
-        assertTableContent(repo = repo, table = s.ver, expectedRows = listOf(
-            listOf(s.ver.timestamp to timeDeleted1, s.cardId to cardId1, s.updatedAt to timeCreated1, s.delay to "1s", s.nextAccessInMillis to 1000L, s.nextAccessAt to timeCreated1+1000)
+        assertTableContent(repo = repo, table = n.ver, expectedRows = listOf(
+            listOf(n.ver.timestamp to timeDeleted1, n.noteId to noteId1, n.text to expectedText1)
         ))
-
-        assertTableContent(repo = repo, table = l, expectedRows = listOf())
     }
 
 }

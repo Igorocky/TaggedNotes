@@ -5,12 +5,10 @@ import android.database.Cursor.*
 import androidx.test.platform.app.InstrumentationRegistry
 import org.igye.taggednotes.ErrorCode.ERROR_IN_TEST
 import org.igye.taggednotes.common.TaggedNotesException
-import org.igye.taggednotes.common.Utils
 import org.igye.taggednotes.database.ObjectType
 import org.igye.taggednotes.database.Repository
 import org.igye.taggednotes.database.Table
 import org.igye.taggednotes.database.tables.*
-import org.igye.taggednotes.dto.domain.CardSchedule
 import org.igye.taggednotes.dto.domain.Note
 import org.igye.taggednotes.manager.DataManager
 import org.igye.taggednotes.manager.RepositoryManager
@@ -19,23 +17,20 @@ import org.junit.Assert.*
 import org.junit.Before
 import java.util.*
 import kotlin.random.Random
+import kotlin.random.nextLong
 
 open class InstrumentedTestBase {
     protected val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-    protected val testClock = TestClock(1000)
-    protected val TR_TP = ObjectType.TRANSLATION.intValue
-    protected val NC_TP = ObjectType.NOTE.intValue
+    protected val testClock = TestClock(Random.nextLong(LongRange(1000, 10_000)))
+    protected val N_TP = ObjectType.NOTE.intValue
 
     protected lateinit var dm: DataManager
     protected lateinit var sm: SettingsManager
     protected lateinit var repo: Repository
-    protected lateinit var c: ObjectsTable
+    protected lateinit var o: ObjectsTable
     protected lateinit var tg: TagsTable
-    protected lateinit var ctg: ObjectToTagTable
-    protected lateinit var t: TranslationCardsTable
+    protected lateinit var otg: ObjectToTagTable
     protected lateinit var n: NotesTable
-    protected lateinit var s: CardsScheduleTable
-    protected lateinit var l: TranslationCardsLogTable
 
     @Before
     fun init() {
@@ -43,12 +38,9 @@ open class InstrumentedTestBase {
         dm = createInmemoryDataManager()
         repo = dm.getRepo()
 
-        c = repo.objs
-        s = repo.cardsSchedule
+        o = repo.objs
         tg = repo.tags
-        ctg = repo.objToTag
-        t = repo.translationCards
-        l = repo.translationCardsLog
+        otg = repo.objToTag
         n = repo.notes
 
         testClock.setFixedTime(Random.nextLong(from = 1000L, until = 10_000L))
@@ -95,98 +87,43 @@ open class InstrumentedTestBase {
         return tagId
     }
 
-    protected fun createTranslateCard(card: Note): Long {
-        insert(repo = repo, table = c, rows = listOf(
-            listOf(c.id to card.id, c.createdAt to card.createdAt, c.type to TR_TP, c.paused to if (card.paused) 1 else 0, c.lastCheckedAt to card.timeSinceLastCheck.toLong())
+    protected fun createNote(note: Note): Long {
+        insert(repo = repo, table = o, rows = listOf(
+            listOf(o.id to note.id, o.createdAt to note.createdAt, o.type to N_TP)
         ))
-        insert(repo = repo, table = s, rows = listOf(
-            listOf(
-                s.cardId to card.id,
-                s.updatedAt to card.schedule.updatedAt,
-                s.origDelay to card.schedule.origDelay,
-                s.delay to card.schedule.delay,
-                s.randomFactor to 1.0,
-                s.nextAccessInMillis to card.schedule.nextAccessInMillis,
-                s.nextAccessAt to card.schedule.nextAccessAt
-            )
+        insert(repo = repo, table = n, rows = listOf(
+            listOf(n.noteId to note.id, n.text to note.text)
         ))
-        insert(repo = repo, table = t, rows = listOf(
-            listOf(t.cardId to card.id, t.textToTranslate to card.textToTranslate, t.translation to card.translation)
-        ))
-        card.tagIds.forEach {
-            insert(repo = repo, table = ctg, rows = listOf(
-                listOf(ctg.objId to card.id, ctg.tagId to it)
+        note.tagIds.forEach {
+            insert(repo = repo, table = otg, rows = listOf(
+                listOf(otg.objId to note.id, otg.tagId to it)
             ))
         }
-        return card.id
+        return note.id
     }
 
-    protected fun createCard(cardId: Long, tagIds: List<Long> = emptyList(), mapper: (Note) -> Note = {it}): Note {
-        val createdAt = 1000 * cardId + 1
-        val updatedAt = 10000 * cardId + 1
-        val currTime = testClock.currentMillis()
-        val lastCheckedAt = currTime - Utils.MILLIS_IN_HOUR*cardId - Utils.MILLIS_IN_MINUTE*cardId
-        val nextAccessInMillis = Utils.MILLIS_IN_HOUR * cardId + 2
-        val modifiedCard = mapper(
+    protected fun createNote(noteId: Long, tagIds: List<Long> = emptyList(), mapper: (Note) -> Note = { it }): Note {
+        val createdAt = 1000 * noteId + 1
+        val modifiedNote = mapper(
             Note(
-                id = cardId,
+                id = noteId,
                 createdAt = createdAt,
-                paused = false,
                 tagIds = tagIds,
-                schedule = CardSchedule(
-                    cardId = cardId,
-                    updatedAt = updatedAt,
-                    origDelay = "delay-" + cardId,
-                    delay = "delay-" + cardId,
-                    nextAccessInMillis = nextAccessInMillis,
-                    nextAccessAt = updatedAt + nextAccessInMillis,
-                ),
-                timeSinceLastCheck = lastCheckedAt.toString(),
-                activatesIn = "",
-                overdue = 0.0,
-                textToTranslate = "textToTranslate-" + cardId,
-                translation = "translation-" + cardId,
+                text = "note-text-" + noteId,
             )
         )
-        val finalNextAccessAt = (currTime - modifiedCard.overdue * modifiedCard.schedule.nextAccessInMillis).toLong()
-        val finalCard = modifiedCard.copy(
-            schedule = modifiedCard.schedule.copy(
-                nextAccessAt = finalNextAccessAt,
-            ),
-            activatesIn = Utils.millisToDurationStr(finalNextAccessAt - currTime)
-        )
-        createTranslateCard(finalCard)
-        return finalCard.copy(
-            timeSinceLastCheck = Utils.millisToDurationStr(currTime - lastCheckedAt)
-        )
+        createNote(modifiedNote)
+        return modifiedNote
     }
 
-    protected fun assertTranslateCardsEqual(
+    protected fun assertNotesEqual(
         expected: Note,
         actual: Note,
-        skipTimeSinceLastCheck: Boolean = false,
-        skipOverdue: Boolean = false,
     ) {
         assertEquals("doesn't match: id", expected.id, actual.id)
         assertEquals("doesn't match: createdAt", expected.createdAt, actual.createdAt)
-        assertEquals("doesn't match: paused", expected.paused, actual.paused)
-
         assertEquals("doesn't match: tagIds", expected.tagIds, actual.tagIds)
-
-        assertEquals("doesn't match: schedule.cardId", expected.schedule.cardId, actual.schedule.cardId)
-        assertEquals("doesn't match: schedule.updatedAt", expected.schedule.updatedAt, actual.schedule.updatedAt)
-        assertEquals("doesn't match: schedule.delay", expected.schedule.delay, actual.schedule.delay)
-        assertEquals("doesn't match: schedule.nextAccessInMillis", expected.schedule.nextAccessInMillis, actual.schedule.nextAccessInMillis)
-        assertEquals("doesn't match: schedule.nextAccessAt", expected.schedule.nextAccessAt, actual.schedule.nextAccessAt)
-
-        if (!skipTimeSinceLastCheck) {
-            assertEquals("doesn't match: timeSinceLastCheck", expected.timeSinceLastCheck, actual.timeSinceLastCheck)
-        }
-        if (!skipOverdue) {
-            assertEquals("doesn't match: overdue", expected.overdue, actual.overdue, 0.0001)
-        }
-        assertEquals("doesn't match: textToTranslate", expected.textToTranslate, actual.textToTranslate)
-        assertEquals("doesn't match: translation", expected.translation, actual.translation)
+        assertEquals("doesn't match: text", expected.text, actual.text)
     }
 
     private fun formatActualAndExpected(allData: List<Map<String, Any?>>, expected: List<Pair<String, Any?>>, matchColumn: String): String {
@@ -282,11 +219,8 @@ open class InstrumentedTestBase {
 
     protected fun createInmemoryDataManager(): DataManager {
         val cards = ObjectsTable(clock = testClock)
-        val cardsSchedule = CardsScheduleTable(clock = testClock, cards = cards)
-        val translationCards = TranslationCardsTable(clock = testClock, cards = cards)
-        val translationCardsLog = TranslationCardsLogTable(clock = testClock)
         val tags = TagsTable(clock = testClock)
-        val cardToTag = ObjectToTagTable(clock = testClock, objects = cards, tags = tags)
+        val cardToTag = ObjectToTagTable(objects = cards, tags = tags)
         val noteCards = NotesTable(clock = testClock, objs = cards)
 
         return DataManager(
@@ -299,9 +233,6 @@ open class InstrumentedTestBase {
                         context = appContext,
                         dbName = null,
                         objs = cards,
-                        cardsSchedule = cardsSchedule,
-                        translationCards = translationCards,
-                        translationCardsLog = translationCardsLog,
                         tags = tags,
                         objToTag = cardToTag,
                         notes = noteCards

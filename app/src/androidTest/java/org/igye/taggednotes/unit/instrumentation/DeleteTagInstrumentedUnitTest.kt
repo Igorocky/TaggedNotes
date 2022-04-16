@@ -50,11 +50,11 @@ class DeleteTagInstrumentedUnitTest: InstrumentedTestBase() {
         insert(repo = repo, table = tg, rows = listOf(
             listOf(tg.id to 1, tg.createdAt to 1000, tg.name to "fff")
         ))
-        insert(repo = repo, table = c, rows = listOf(
-            listOf(c.id to 1, c.createdAt to 1000, c.type to TR_TP)
+        insert(repo = repo, table = o, rows = listOf(
+            listOf(o.id to 1, o.createdAt to 1000, o.type to N_TP)
         ))
-        insert(repo = repo, table = ctg, rows = listOf(
-            listOf(ctg.objId to 1, ctg.tagId to 1)
+        insert(repo = repo, table = otg, rows = listOf(
+            listOf(otg.objId to 1, otg.tagId to 1)
         ))
 
         //when

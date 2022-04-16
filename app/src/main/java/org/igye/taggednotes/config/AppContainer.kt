@@ -17,7 +17,7 @@ import java.util.concurrent.Executors
 
 class AppContainer(
     val context: Context,
-    val dbName: String = "memory-refresh-db"
+    val dbName: String = "taggednotes-db"
 ) {
     companion object {
         private val appVersion = "1.0"
@@ -27,13 +27,10 @@ class AppContainer(
     val clock = Clock.systemDefaultZone()
     val beThreadPool: ExecutorService = Executors.newFixedThreadPool(4)
 
-    val cards = ObjectsTable(clock = clock)
-    val cardsSchedule = CardsScheduleTable(clock = clock, cards = cards)
-    val translationCards = TranslationCardsTable(clock = clock, cards = cards)
-    val translationCardsLog = TranslationCardsLogTable(clock = clock)
+    val objects = ObjectsTable(clock = clock)
     val tags = TagsTable(clock = clock)
-    val cardToTag = ObjectToTagTable(clock = clock, objects = cards, tags = tags)
-    val noteCards = NotesTable(clock = clock, objs = cards)
+    val objToTag = ObjectToTagTable(objects = objects, tags = tags)
+    val notes = NotesTable(clock = clock, objs = objects)
 
     val repositoryManager = RepositoryManager(context = context, clock = clock, repositoryProvider = {createNewRepo()})
     val settingsManager = SettingsManager(context = context)
@@ -48,13 +45,10 @@ class AppContainer(
         return Repository(
             context = context,
             dbName = dbName,
-            objs = cards,
-            cardsSchedule = cardsSchedule,
-            translationCards = translationCards,
-            translationCardsLog = translationCardsLog,
+            objs = objects,
             tags = tags,
-            objToTag = cardToTag,
-            notes = noteCards
+            objToTag = objToTag,
+            notes = notes
         )
     }
 

@@ -58,16 +58,16 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val tagId1 = createTag(tagId = 1, name = "t1")
         val tagId2 = createTag(tagId = 2, name = "t2")
         val tagId3 = createTag(tagId = 3, name = "t3")
-        val cardId1 = createCard(cardId = 1L).id
-        val cardId2 = createCard(cardId = 2L).id
-        val cardId3 = createCard(cardId = 3L).id
+        val cardId1 = createNote(noteId = 1L).id
+        val cardId2 = createNote(noteId = 2L).id
+        val cardId3 = createNote(noteId = 3L).id
 
-        insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.objId to cardId1, ctg.tagId to tagId1),
-            listOf(ctg.objId to cardId2, ctg.tagId to tagId1),
-            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
+        insert(repo = repo, table = otg, listOf(
+            listOf(otg.objId to cardId1, otg.tagId to tagId1),
+            listOf(otg.objId to cardId2, otg.tagId to tagId1),
+            listOf(otg.objId to cardId3, otg.tagId to tagId2),
+            listOf(otg.objId to cardId2, otg.tagId to tagId3),
+            listOf(otg.objId to cardId1, otg.tagId to tagId2),
         ))
 
         //when
@@ -86,17 +86,17 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val tagId1 = createTag(tagId = 1, name = "t1")
         val tagId2 = createTag(tagId = 2, name = "t2")
         val tagId3 = createTag(tagId = 3, name = "t3")
-        val cardId1 = createCard(cardId = 1L).id
-        val cardId2 = createCard(cardId = 2L).id
-        val cardId3 = createCard(cardId = 3L).id
+        val cardId1 = createNote(noteId = 1L).id
+        val cardId2 = createNote(noteId = 2L).id
+        val cardId3 = createNote(noteId = 3L).id
 
-        insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.objId to cardId1, ctg.tagId to tagId1),
-            listOf(ctg.objId to cardId2, ctg.tagId to tagId1),
-            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
-            listOf(ctg.objId to cardId3, ctg.tagId to tagId3),
+        insert(repo = repo, table = otg, listOf(
+            listOf(otg.objId to cardId1, otg.tagId to tagId1),
+            listOf(otg.objId to cardId2, otg.tagId to tagId1),
+            listOf(otg.objId to cardId3, otg.tagId to tagId2),
+            listOf(otg.objId to cardId2, otg.tagId to tagId3),
+            listOf(otg.objId to cardId1, otg.tagId to tagId2),
+            listOf(otg.objId to cardId3, otg.tagId to tagId3),
         ))
 
         //when
@@ -115,16 +115,16 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val tagId1 = createTag(tagId = 1, name = "t1")
         val tagId2 = createTag(tagId = 2, name = "t2")
         val tagId3 = createTag(tagId = 3, name = "t3")
-        val cardId1 = createCard(cardId = 1L).id
-        val cardId2 = createCard(cardId = 2L).id
-        val cardId3 = createCard(cardId = 3L).id
+        val cardId1 = createNote(noteId = 1L).id
+        val cardId2 = createNote(noteId = 2L).id
+        val cardId3 = createNote(noteId = 3L).id
 
-        insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.objId to cardId2, ctg.tagId to tagId1),
-            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
-            listOf(ctg.objId to cardId3, ctg.tagId to tagId3),
+        insert(repo = repo, table = otg, listOf(
+            listOf(otg.objId to cardId2, otg.tagId to tagId1),
+            listOf(otg.objId to cardId3, otg.tagId to tagId2),
+            listOf(otg.objId to cardId2, otg.tagId to tagId3),
+            listOf(otg.objId to cardId1, otg.tagId to tagId2),
+            listOf(otg.objId to cardId3, otg.tagId to tagId3),
         ))
 
         //when
@@ -143,16 +143,16 @@ class ReadTagInstrumentedUnitTest: InstrumentedTestBase() {
         val tagId1 = createTag(tagId = 1, name = "t1")
         val tagId2 = createTag(tagId = 2, name = "t2")
         val tagId3 = createTag(tagId = 3, name = "t3")
-        val cardId1 = createCard(cardId = 1L).id
-        val cardId2 = createCard(cardId = 2L).id
-        val cardId3 = createCard(cardId = 3L).id
+        val cardId1 = createNote(noteId = 1L).id
+        val cardId2 = createNote(noteId = 2L).id
+        val cardId3 = createNote(noteId = 3L).id
 
-        insert(repo = repo, table = ctg, listOf(
-            listOf(ctg.objId to cardId1, ctg.tagId to tagId1),
-            listOf(ctg.objId to cardId2, ctg.tagId to tagId3),
-            listOf(ctg.objId to cardId3, ctg.tagId to tagId2),
-            listOf(ctg.objId to cardId3, ctg.tagId to tagId3),
-            listOf(ctg.objId to cardId1, ctg.tagId to tagId2),
+        insert(repo = repo, table = otg, listOf(
+            listOf(otg.objId to cardId1, otg.tagId to tagId1),
+            listOf(otg.objId to cardId2, otg.tagId to tagId3),
+            listOf(otg.objId to cardId3, otg.tagId to tagId2),
+            listOf(otg.objId to cardId3, otg.tagId to tagId3),
+            listOf(otg.objId to cardId1, otg.tagId to tagId2),
         ))
 
         //when
