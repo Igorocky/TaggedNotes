@@ -1,13 +1,10 @@
 "use strict";
 
-const EditTranslateCardForm = ({
+const EditNoteForm = ({
                                     allTags, allTagsMap,
-                                    paused,pausedOnChange,pausedBgColor,
-                                    textToTranslate,textToTranslateOnChange,textToTranslateBgColor,textToTranslateId,textToTranslateOnExtractWords,
-                                    translation, translationOnChange, translationBgColor, translationId,
-                                    delay,delayOnChange,delayBgColor,
+                                    text,textOnChange,textBgColor,textId,
                                     tagIds,tagIdsOnChange,tagIdsBgColor,
-                                    activatesIn,createdAt,
+                                    createdAt,
                                     onSave, saveDisabled,
                                     onCancel, cancelDisabled,
                                     onDelete,

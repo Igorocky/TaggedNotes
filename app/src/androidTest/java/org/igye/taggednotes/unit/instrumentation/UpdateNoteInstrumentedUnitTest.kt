@@ -173,7 +173,7 @@ class UpdateNoteInstrumentedUnitTest: InstrumentedTestBase() {
         assertTableContent(repo = repo, table = o.ver, expectedRows = listOf())
 
         assertTableContent(repo = repo, table = n, expectedRows = listOf(
-            listOf(n.noteId to noteId, n.text to textBeforeUpdate),
+            listOf(n.id to noteId, n.text to textBeforeUpdate),
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
 
@@ -199,10 +199,10 @@ class UpdateNoteInstrumentedUnitTest: InstrumentedTestBase() {
         assertTableContent(repo = repo, table = o.ver, expectedRows = listOf())
 
         assertTableContent(repo = repo, table = n, expectedRows = listOf(
-            listOf(n.noteId to noteId, n.text to textAfterUpdate),
+            listOf(n.id to noteId, n.text to textAfterUpdate),
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf(
-            listOf(n.noteId to noteId, n.ver.timestamp to updateTime, n.text to textBeforeUpdate),
+            listOf(n.id to noteId, n.ver.timestamp to updateTime, n.text to textBeforeUpdate),
         ))
 
         assertTableContent(repo = repo, table = otg, expectedRows = listOf(

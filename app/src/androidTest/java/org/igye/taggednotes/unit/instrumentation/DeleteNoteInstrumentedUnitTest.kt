@@ -33,9 +33,9 @@ class DeleteNoteInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(o.ver.timestamp to timeDeleted, o.id to noteId, o.type to N_TP, o.createdAt to timeCreated)
         ))
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf())
+        assertTableContent(repo = repo, table = n, matchColumn = n.id, expectedRows = listOf())
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf(
-            listOf(n.ver.timestamp to timeDeleted, n.noteId to noteId, n.text to expectedText)
+            listOf(n.ver.timestamp to timeDeleted, n.id to noteId, n.text to expectedText)
         ))
     }
 
@@ -67,11 +67,11 @@ class DeleteNoteInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(o.ver.timestamp to timeDeleted1, o.id to noteId1, o.type to N_TP, o.createdAt to timeCreated1)
         ))
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
-            listOf(n.noteId to noteId2, n.text to expectedText2)
+        assertTableContent(repo = repo, table = n, matchColumn = n.id, expectedRows = listOf(
+            listOf(n.id to noteId2, n.text to expectedText2)
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf(
-            listOf(n.ver.timestamp to timeDeleted1, n.noteId to noteId1, n.text to expectedText1)
+            listOf(n.ver.timestamp to timeDeleted1, n.id to noteId1, n.text to expectedText1)
         ))
     }
 

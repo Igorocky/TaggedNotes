@@ -9,13 +9,13 @@ class NotesTable(
     private val clock: Clock,
     private val objs: ObjectsTable,
 ): TableWithVersioning(name = "NOTES") {
-    val noteId = "NOTE_ID"
+    val id = "ID"
     val text = "TEXT"
 
     override fun create(db: SQLiteDatabase) {
         db.execSQL("""
                 CREATE TABLE $this (
-                    $noteId integer unique references $objs(${objs.id}) on update restrict on delete restrict,
+                    $id integer unique references $objs(${objs.id}) on update restrict on delete restrict,
                     $text text not null
                 )
         """)
@@ -24,7 +24,7 @@ class NotesTable(
                     ${ver.verId} integer primary key autoincrement,
                     ${ver.timestamp} integer not null,
                     
-                    $noteId integer not null,
+                    $id integer not null,
                     $text text not null
                 )
         """)
@@ -36,15 +36,15 @@ class NotesTable(
 
     override fun prepareStatements(db: SQLiteDatabase) {
         val self = this
-        val stmtVer = db.compileStatement("insert into $ver (${ver.timestamp},$noteId,$text) " +
-                "select ?, $noteId, $text from $self where $noteId = ?")
+        val stmtVer = db.compileStatement("insert into $ver (${ver.timestamp},$id,$text) " +
+                "select ?, $id, $text from $self where $id = ?")
         fun saveCurrentVersion(noteId: Long) {
             stmtVer.bindLong(1, clock.instant().toEpochMilli())
             stmtVer.bindLong(2, noteId)
             Utils.executeInsert(stmtVer)
         }
         insert = object : InsertStmt {
-            val stmt = db.compileStatement("insert into $self ($noteId,$text) values (?,?)")
+            val stmt = db.compileStatement("insert into $self ($id,$text) values (?,?)")
             override fun invoke(noteId: Long, text: String): Long {
                 stmt.bindLong(1, noteId)
                 stmt.bindString(2, text)
@@ -52,7 +52,7 @@ class NotesTable(
             }
         }
         update = object : UpdateStmt {
-            private val stmt = db.compileStatement("update $self set $text = ? where $noteId = ?")
+            private val stmt = db.compileStatement("update $self set $text = ? where $id = ?")
             override fun invoke(noteId: Long, text: String): Int {
                 saveCurrentVersion(noteId = noteId)
                 stmt.bindString(1, text)
@@ -62,7 +62,7 @@ class NotesTable(
 
         }
         delete = object : DeleteStmt {
-            private val stmt = db.compileStatement("delete from $self where $noteId = ?")
+            private val stmt = db.compileStatement("delete from $self where $id = ?")
             override fun invoke(noteId: Long): Int {
                 saveCurrentVersion(noteId = noteId)
                 stmt.bindLong(1, noteId)

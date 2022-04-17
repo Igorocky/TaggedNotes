@@ -19,9 +19,9 @@ function createFeBeBridgeForUiTestMode() {
         }
     }
 
-    const CARDS = []
+    const NOTES = []
     const TAGS = []
-    const CARDS_TO_TAGS = []
+    const OBJS_TO_TAGS = []
 
     mockedBeFunctions.createTag = ({name}) => {
         if (TAGS.find(t=>t.name==name)) {
@@ -38,13 +38,13 @@ function createFeBeBridgeForUiTestMode() {
         return okResponse(TAGS.map(t => ({...t})))
     }
 
-    mockedBeFunctions.getCardToTagMapping = () => {
+    mockedBeFunctions.getObjToTagMapping = () => {
         const res = {}
-        CARDS_TO_TAGS.forEach(({cardId,tagId}) => {
-            if (res[cardId] === undefined) {
-                res[cardId] = []
+        OBJS_TO_TAGS.forEach(({objId,tagId}) => {
+            if (res[objId] === undefined) {
+                res[objId] = []
             }
-            res[cardId].push(tagId)
+            res[objId].push(tagId)
         })
         return okResponse(res)
     }
@@ -68,206 +68,76 @@ function createFeBeBridgeForUiTestMode() {
 
     mockedBeFunctions.deleteTag = ({tagId}) => {
         // return errResponse(2,'Error while deleting a tag.')
-        if (CARDS_TO_TAGS.find(ctg => tagId===ctg.tagId)) {
-            return errResponse(222,'This tag is used by a card.')
+        if (OBJS_TO_TAGS.find(otg => tagId===otg.tagId)) {
+            return errResponse(222,'This tag is used by a note.')
         } else {
             removeIf(TAGS,t => t.id===tagId)
             return okResponse()
         }
     }
 
-    mockedBeFunctions.createTranslateCard = ({textToTranslate, translation, tagIds, paused}) => {
-        textToTranslate = textToTranslate?.trim()??''
-        translation = translation?.trim()??''
-        if (textToTranslate == '') {
+    mockedBeFunctions.createNote = ({text, tagIds}) => {
+        text = text?.trim()??''
+        if (text === '') {
             return errResponse(1, 'textToTranslate is empty')
-        } else if (translation == '') {
-            return errResponse(2, 'translation is empty')
         } else {
-            const id = (CARDS.map(c=>c.id).max()??0)+1
-            const newCard = {
+            const id = (NOTES.map(n=>n.id).max()??0)+1
+            const newNote = {
                 id,
                 createdAt: new Date().getTime(),
-                paused,
-                schedule: {
-                    cardId: id,
-                    updatedAt: new Date().getTime(),
-                    delay: '3h',
-                    nextAccessInMillis: 0,
-                    nextAccessAt: new Date().getTime()
-                },
-                timeSinceLastCheck: '1d 3h',
-                activatesIn: '5h 23m',
-                overdue: 1.03,
-                textToTranslate,
-                translation
+                text
             }
-            CARDS.push(newCard)
+            NOTES.push(newNote)
             for (let tagId of tagIds) {
-                CARDS_TO_TAGS.push({cardId:id,tagId})
+                OBJS_TO_TAGS.push({objId:id,tagId})
             }
             return okResponse(id)
         }
     }
 
-    mockedBeFunctions.readTranslateCardById = ({cardId}) => {
-        const card = CARDS.find(c=>c.id==cardId)
-        if (hasNoValue(card)) {
-            return errResponse(9, 'Error getting translate card by id.')
+    mockedBeFunctions.readNoteById = ({noteId}) => {
+        const note = NOTES.find(n=>n.id==noteId)
+        if (hasNoValue(note)) {
+            return errResponse(9, 'Error getting a note by id.')
         } else {
             return okResponse({
-                id: card.id,
-                createdAt: card.createdAt,
-                paused: card.paused,
-                tagIds: CARDS_TO_TAGS.filter(p => p.cardId === cardId).map(p=>p.tagId),
-                schedule: {
-                    cardId: card.schedule.cardId,
-                    updatedAt: card.schedule.updatedAt,
-                    delay: card.schedule.delay,
-                    nextAccessInMillis: card.schedule.nextAccessInMillis,
-                    nextAccessAt: card.schedule.nextAccessAt,
-                },
-                timeSinceLastCheck: card.timeSinceLastCheck,
-                activatesIn: card.activatesIn,
-                overdue: card.overdue,
-                textToTranslate: card.textToTranslate,
-                translation: card.translation,
+                id: note.id,
+                createdAt: note.createdAt,
+                tagIds: OBJS_TO_TAGS.filter(p => p.objId === noteId).map(p=>p.tagId),
+                text: note.text,
             })
         }
     }
 
-    mockedBeFunctions.readTranslateCardsByFilter = (filter) => {
+    mockedBeFunctions.readNotesByFilter = (filter) => {
         // return okResponse([])
-        return okResponse({cards:CARDS.map(c => mockedBeFunctions.readTranslateCardById({cardId: c.id}).data)})
+        return okResponse({notes:NOTES.map(n => mockedBeFunctions.readNoteById({noteId: n.id}).data)})
     }
 
-    mockedBeFunctions.readTranslateCardHistory = ({cardId}) => {
-        const history = {"dataHistory":[{"cardId":1,"textToTranslate":"* could I see your passport, please?\n" +
+    mockedBeFunctions.readNoteHistory = ({noteId}) => {
+        const history = {"dataHistory":[{"noteId":1,"text":"* could I see your passport, please?\n" +
                     "* sure, here it is.\n" +
                     "* how much baggage do you have?\n" +
-                    "* just one carry-on.","timestamp":1641560590172,"translation":"* could I see your passport, please?\n" +
-                    "* sure, here it is.\n" +
-                    "* how much baggage do you have?\n" +
-                    "* just one carry-on.","validationHistory":[{"actualDelay":"12m 0s","cardId":1,"isCorrect":false,"recId":9,"timestamp":1641562570172,"translation":"* could I see your passport, please?\n" +
-                        "* sure, here it is.\n" +
-                        "* how much baggage do you have?\n" +
-                        "* just one carry-on."},{"actualDelay":"11m 0s","cardId":1,"isCorrect":false,"recId":8,"timestamp":1641561850172,"translation":"c-2"},{"actualDelay":"19m 0s","cardId":1,"isCorrect":false,"recId":7,"timestamp":1641561190172,"translation":"c-1"}],"verId":-1},{"cardId":1,"textToTranslate":"B","timestamp":1641558790172,"translation":"b","validationHistory":[{"actualDelay":"8m 0s","cardId":1,"isCorrect":false,"recId":6,"timestamp":1641560050172,"translation":"bb"},{"actualDelay":"7m 0s","cardId":1,"isCorrect":true,"recId":5,"timestamp":1641559570172,"translation":"b"},{"actualDelay":"11m 0s","cardId":1,"isCorrect":false,"recId":4,"timestamp":1641559150172,"translation":"bb"}],"verId":2},{"cardId":1,"textToTranslate":"A","timestamp":1641557950172,"translation":"a","validationHistory":[{"actualDelay":"4m 0s","cardId":1,"isCorrect":true,"recId":3,"timestamp":1641558490172,"translation":"a"},{"actualDelay":"3m 0s","cardId":1,"isCorrect":false,"recId":2,"timestamp":1641558250172,"translation":"aa"},{"actualDelay":"","cardId":1,"isCorrect":true,"recId":1,"timestamp":1641558070172,"translation":"a"}],"verId":1}],"isHistoryFull":true}
+                    "* just one carry-on.","timestamp":1641560590172,"verId":-1
+            },{"noteId":1,"text":"B","timestamp":1641558790172,"verId":2},
+                {"noteId":1,"text":"A","timestamp":1641557950172,"verId":1}],"isHistoryFull":true}
         return okResponse(history)
     }
 
-    let topCnt = 0
-    mockedBeFunctions.selectTopOverdueTranslateCards = (filter) => {
-        // return okResponse({
-        //     cards: [],
-        //     nextCardIn: ''
-        // })
-
-        return okResponse({
-            cards: CARDS.map(c=>mockedBeFunctions.readTranslateCardById({cardId:c.id}).data)
-        })
-
-        if (topCnt !== 1) {
-            topCnt++
-            return okResponse({
-                cards: CARDS.map(c=>mockedBeFunctions.readTranslateCardById({cardId:c.id}).data)
-            })
+    mockedBeFunctions.updateNote = ({noteId, text, tagIds}) => {
+        const note = NOTES.find(n=>n.id===noteId)
+        if (hasNoValue(note)) {
+            return errResponse(7, 'Error getting note by id.')
         } else {
-            topCnt++
-            return okResponse({
-                nextCardIn: '8h 38m'
-            })
-        }
-        // return okResponse([])
-
-    }
-
-    mockedBeFunctions.validateTranslateCard = ({cardId, userProvidedTranslation}) => {
-        const card = CARDS.find(c=>c.id==cardId)
-        if (hasNoValue(card)) {
-            return errResponse(11, 'Error getting translate card by id.')
-        } else {
-            return okResponse({
-                answer: card.translation,
-                isCorrect: card.translation == userProvidedTranslation
-            })
-        }
-    }
-
-    mockedBeFunctions.updateTranslateCard = ({cardId, textToTranslate, translation, delay, recalculateDelay, paused, tagIds}) => {
-        const card = CARDS.find(c=>c.id==cardId)
-        if (hasNoValue(card)) {
-            return errResponse(7, 'Error getting translate card by id.')
-        } else {
-            card.paused = paused??card.paused
-            card.textToTranslate = textToTranslate??card.textToTranslate
-            card.translation = translation??card.translation
-            if (hasValue(delay) && (delay != card.schedule.delay || recalculateDelay)) {
-                card.schedule.delay = delay
-                card.schedule.nextAccessInMillis = 1000
-                card.schedule.nextAccessAt = (new Date().getTime()) + card.schedule.nextAccessInMillis
-            }
+            note.text = text??note.text
             return okResponse(true)
         }
     }
 
-    mockedBeFunctions.getNextCardToRepeat = () => {
-        if (!CARDS.length) {
-            return okResponse({cardsRemain: 0, nextCardIn: ''})
-        } else {
-            const curTime = new Date().getTime()
-            const activeCards = CARDS.filter(c=>c.schedule.nextAccessAt <= curTime)
-            if (!activeCards.length) {
-                return okResponse({cardsRemain: 0, nextCardIn: '###'})
-            } else {
-                const selectedCard = activeCards[randomInt(0,activeCards.length-1)]
-                return okResponse({
-                    cardId: selectedCard.id,
-                    cardType: 'TRANSLATION',
-                    cardsRemain: activeCards.length,
-                    isCardsRemainExact: true
-                })
-            }
-        }
-    }
 
-    mockedBeFunctions.deleteTranslateCard = ({cardId}) => {
-        removeIf(CARDS, c=>c.id===cardId)
+    mockedBeFunctions.deleteNote = ({noteId}) => {
+        removeIf(NOTES, n=>n.id===noteId)
         return okResponse(true)
-    }
-
-    const DELAY_COEFS = ['x1.2','x1.5','x2','x3']
-    mockedBeFunctions.readDelayCoefs = () => {
-        return okResponse([...DELAY_COEFS])
-    }
-
-    mockedBeFunctions.updateDelayCoefs = ({newCoefs}) => {
-        DELAY_COEFS.splice(0,DELAY_COEFS.length)
-        DELAY_COEFS.push(...newCoefs)
-        return okResponse([...DELAY_COEFS])
-    }
-
-    const DEFAULT_DELAY_COEFS = {
-        onCorrect: null,
-        onError: null
-    }
-    mockedBeFunctions.readDefaultDelayCoefs = () => {
-        return okResponse({...DEFAULT_DELAY_COEFS})
-    }
-
-    mockedBeFunctions.updateDefaultDelayCoefs = ({newDefCoefs}) => {
-        DEFAULT_DELAY_COEFS.onCorrect = newDefCoefs.onCorrect
-        DEFAULT_DELAY_COEFS.onError = newDefCoefs.onError
-        return mockedBeFunctions.readDefaultDelayCoefs()
-    }
-
-    const MAX_DELAY = ['30d']
-    mockedBeFunctions.readMaxDelay = () => {
-        return okResponse(MAX_DELAY[0])
-    }
-
-    mockedBeFunctions.updateMaxDelay = ({newMaxDelay}) => {
-        MAX_DELAY[0] = newMaxDelay
-        return mockedBeFunctions.readMaxDelay()
     }
 
     mockedBeFunctions.doBackup = () => {
@@ -356,18 +226,16 @@ function createFeBeBridgeForUiTestMode() {
             return result
         }
 
-        const numOfCards = 1000
-        ints(1,numOfCards)
-            .map(i=>randomSentence({wordsMinCnt:1, wordsMaxCnt:1, wordMinLength:1, wordMaxLength:1}))
+        const numOfNotes = 1000
+        ints(1,numOfNotes)
+            .map(i=>randomSentence({wordsMinCnt:1, wordsMaxCnt:10, wordMinLength:1, wordMaxLength:7}))
             .forEach(s=> {
                 // if (randomInt(0,1) === 1) {
                 //     s = s.replaceAll(' ', '\n')
                 // }
-                mockedBeFunctions.createTranslateCard({
-                    textToTranslate: s.toUpperCase(),
-                    translation: s.toLowerCase(),
+                mockedBeFunctions.createNote({
+                    text: s,
                     tagIds: getRandomTagIds(),
-                    paused: randomInt(0, 1) === 1
                 })
             })
     }

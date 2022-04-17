@@ -2,18 +2,12 @@ package org.igye.taggednotes.integration
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import org.igye.taggednotes.common.Utils
-import org.igye.taggednotes.common.Utils.MILLIS_IN_HOUR
-import org.igye.taggednotes.common.Utils.MILLIS_IN_MINUTE
-import org.igye.taggednotes.database.ObjectType
 import org.igye.taggednotes.dto.domain.Note
 import org.igye.taggednotes.manager.DataManager.*
-import org.igye.taggednotes.manager.SettingsManager
 import org.igye.taggednotes.testutils.InstrumentedTestBase
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.temporal.ChronoUnit
 
 @RunWith(AndroidJUnit4::class)
 class DataManagerInstrumentedIntTest: InstrumentedTestBase() {
@@ -47,8 +41,8 @@ class DataManagerInstrumentedIntTest: InstrumentedTestBase() {
         ))
         assertTableContent(repo = repo, table = o.ver, expectedRows = listOf())
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
-            listOf(n.noteId to actualCreatedNote.id, n.text to expectedText1)
+        assertTableContent(repo = repo, table = n, matchColumn = n.id, expectedRows = listOf(
+            listOf(n.id to actualCreatedNote.id, n.text to expectedText1)
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
 
@@ -68,8 +62,8 @@ class DataManagerInstrumentedIntTest: InstrumentedTestBase() {
         ))
         assertTableContent(repo = repo, table = o.ver, expectedRows = listOf())
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
-            listOf(n.noteId to noteAfterEdit1.id, n.text to expectedText1)
+        assertTableContent(repo = repo, table = n, matchColumn = n.id, expectedRows = listOf(
+            listOf(n.id to noteAfterEdit1.id, n.text to expectedText1)
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
 
@@ -89,11 +83,11 @@ class DataManagerInstrumentedIntTest: InstrumentedTestBase() {
         ))
         assertTableContent(repo = repo, table = o.ver, expectedRows = listOf())
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
-            listOf(n.noteId to noteAfterEdit2.id, n.text to expectedText2)
+        assertTableContent(repo = repo, table = n, matchColumn = n.id, expectedRows = listOf(
+            listOf(n.id to noteAfterEdit2.id, n.text to expectedText2)
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf(
-            listOf(n.noteId to noteAfterEdit2.id, n.text to expectedText1, n.ver.timestamp to timeEdt2)
+            listOf(n.id to noteAfterEdit2.id, n.text to expectedText1, n.ver.timestamp to timeEdt2)
         ))
     }
 }

@@ -92,7 +92,7 @@ open class InstrumentedTestBase {
             listOf(o.id to note.id, o.createdAt to note.createdAt, o.type to N_TP)
         ))
         insert(repo = repo, table = n, rows = listOf(
-            listOf(n.noteId to note.id, n.text to note.text)
+            listOf(n.id to note.id, n.text to note.text)
         ))
         note.tagIds.forEach {
             insert(repo = repo, table = otg, rows = listOf(

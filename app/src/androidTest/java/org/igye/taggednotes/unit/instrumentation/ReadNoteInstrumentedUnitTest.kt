@@ -55,8 +55,8 @@ class ReadNoteInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(o.id to expectedNoteId2, o.type to N_TP, o.createdAt to createTime2),
         ))
         insert(repo = repo, table = n, rows = listOf(
-            listOf(n.noteId to expectedNoteId1, n.text to text1),
-            listOf(n.noteId to expectedNoteId2, n.text to text2),
+            listOf(n.id to expectedNoteId1, n.text to text1),
+            listOf(n.id to expectedNoteId2, n.text to text2),
         ))
         insert(repo = repo, table = otg, rows = listOf(
             listOf(otg.objId to expectedNoteId1, otg.tagId to tagId1),

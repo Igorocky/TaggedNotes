@@ -188,7 +188,7 @@ class DataManager(
             (select group_concat(otg.${otg.tagId}) from $otg otg where otg.${otg.objId} = o.${o.id}) as tagIds 
         from
             $o o
-            left join $n n on o.${o.id} = n.${n.noteId}
+            left join $n n on o.${o.id} = n.${n.id}
         where o.${o.id} = ?
     """.trimIndent()
     @BeMethod
@@ -219,7 +219,7 @@ class DataManager(
 
     data class ReadNoteHistoryArgs(val noteId:Long)
     private val getDataHistoryQuery =
-        "select ${n.ver.verId}, ${n.ver.timestamp}, ${n.noteId}, ${n.text} from ${n.ver} where ${n.noteId} = ? order by ${n.ver.timestamp} desc"
+        "select ${n.ver.verId}, ${n.ver.timestamp}, ${n.id}, ${n.text} from ${n.ver} where ${n.id} = ? order by ${n.ver.timestamp} desc"
     @BeMethod
     @Synchronized
     fun readNoteHistory(args: ReadNoteHistoryArgs): BeRespose<NoteHistResp> {
@@ -249,7 +249,7 @@ class DataManager(
         val tagIds: Set<Long>? = null,
         val text:String? = null,
     )
-    private val updateNoteQuery = "select ${n.text} from $n where ${n.noteId} = ?"
+    private val updateNoteQuery = "select ${n.text} from $n where ${n.id} = ?"
     private val updateTranslateCardQueryColumnNames = arrayOf(n.text)
     @BeMethod
     @Synchronized
@@ -427,7 +427,7 @@ class DataManager(
                     group by o.${o.id}
                     ${if (havingFilters.isEmpty()) "" else havingFilters.joinToString(prefix = "having ", separator = " and ")}
                 ) o
-                left join $n n on o.${o.id} = n.${n.noteId}
+                left join $n n on o.${o.id} = n.${n.id}
             ${if (whereFilters.isEmpty()) "" else whereFilters.joinToString(prefix = "where ", separator = " and ")}
             $orderBy
             $rowNumLimit

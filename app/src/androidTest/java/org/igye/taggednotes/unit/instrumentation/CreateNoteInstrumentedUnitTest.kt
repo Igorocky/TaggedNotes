@@ -35,8 +35,8 @@ class CreateNoteInstrumentedUnitTest: InstrumentedTestBase() {
         assertTableContent(repo = repo, table = tg, expectedRows = listOf())
         assertTableContent(repo = repo, table = otg, expectedRows = listOf())
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
-            listOf(n.noteId to note.id, n.text to expectedText)
+        assertTableContent(repo = repo, table = n, matchColumn = n.id, expectedRows = listOf(
+            listOf(n.id to note.id, n.text to expectedText)
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
     }
@@ -75,8 +75,8 @@ class CreateNoteInstrumentedUnitTest: InstrumentedTestBase() {
             listOf(otg.objId to noteId, otg.tagId to tagId2),
         ))
 
-        assertTableContent(repo = repo, table = n, matchColumn = n.noteId, expectedRows = listOf(
-            listOf(n.noteId to note.id, n.text to expectedText)
+        assertTableContent(repo = repo, table = n, matchColumn = n.id, expectedRows = listOf(
+            listOf(n.id to note.id, n.text to expectedText)
         ))
         assertTableContent(repo = repo, table = n.ver, expectedRows = listOf())
     }

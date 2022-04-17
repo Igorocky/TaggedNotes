@@ -1,6 +1,6 @@
 "use strict";
 
-const EditTranslateCardCmp = ({allTags, allTagsMap, card, reducedMode = false, onCancelled, onSaved, onDeleted}) => {
+const EditNoteCmp = ({allTags, allTagsMap, card, reducedMode = false, onCancelled, onSaved, onDeleted}) => {
     const {renderMessagePopup, showError, confirmAction, showMessageWithProgress} = useMessagePopup()
 
     const [textToTranslate, setTextToTranslate] = useState(card.textToTranslate)
@@ -76,7 +76,7 @@ const EditTranslateCardCmp = ({allTags, allTagsMap, card, reducedMode = false, o
     }
 
     return RE.Fragment({},
-        re(EditTranslateCardForm,{
+        re(EditNoteForm,{
             allTags, allTagsMap,
 
             paused,
