@@ -1,17 +1,11 @@
 package org.igye.taggednotes.manager
 
 import android.content.Context
-import org.igye.taggednotes.ErrorCode
-import org.igye.taggednotes.common.BeMethod
-import org.igye.taggednotes.common.Try
 import org.igye.taggednotes.common.Utils
 import org.igye.taggednotes.dto.common.AppSettings
-import org.igye.taggednotes.dto.common.BeRespose
 import org.igye.taggednotes.dto.common.HttpServerSettings
-import org.igye.taggednotes.dto.domain.DefaultDelayCoefs
 import java.io.File
 import java.io.FileOutputStream
-import java.util.concurrent.atomic.AtomicReference
 
 class SettingsManager(
     private val context: Context,
@@ -63,81 +57,10 @@ class SettingsManager(
         return getHttpServerSettings()
     }
 
-    data class UpdateDelayCoefsArgs(val newCoefs:List<String>)
-    @BeMethod
-    @Synchronized
-    fun updateDelayCoefs(args:UpdateDelayCoefsArgs): BeRespose<List<String>> {
-        return BeRespose(ErrorCode.UPDATE_DELAY_COEFS) {
-            val newCoefs = ArrayList(args.newCoefs)
-            while (newCoefs.size > 4) {
-                newCoefs.removeLast()
-            }
-            while (newCoefs.size < 4) {
-                newCoefs.add("")
-            }
-            val newCoefsFinal = newCoefs.map { Utils.correctDelayCoefIfNeeded(it) }
-            saveApplicationSettings(getApplicationSettings().copy(delayCoefs = newCoefsFinal))
-            newCoefsFinal
-        }
-    }
-
-    @BeMethod
-    @Synchronized
-    fun readDelayCoefs(): BeRespose<List<String>> {
-        return BeRespose(ErrorCode.READ_DELAY_COEFS) {
-            getApplicationSettings().delayCoefs?:listOf("x0.3","","","x1.2")
-        }
-    }
-
-    data class UpdateDefaultDelayCoefsArgs(val newDefCoefs: DefaultDelayCoefs)
-    @BeMethod
-    @Synchronized
-    fun updateDefaultDelayCoefs(args:UpdateDefaultDelayCoefsArgs): BeRespose<DefaultDelayCoefs> {
-        return BeRespose(ErrorCode.UPDATE_DEFAULT_DELAY_COEFS) {
-            saveApplicationSettings(getApplicationSettings().copy(defaultDelayCoefs = args.newDefCoefs))
-            args.newDefCoefs
-        }
-    }
-
-    @BeMethod
-    @Synchronized
-    fun readDefaultDelayCoefs(): BeRespose<DefaultDelayCoefs> {
-        return BeRespose(ErrorCode.READ_DEFAULT_DELAY_COEFS) {
-            getApplicationSettings().defaultDelayCoefs?:DefaultDelayCoefs()
-        }
-    }
-
-    data class UpdateMaxDelayArgs(val newMaxDelay:String)
-    @BeMethod
-    @Synchronized
-    fun updateMaxDelay(args:UpdateMaxDelayArgs): BeRespose<String> {
-        return BeRespose(ErrorCode.UPDATE_MAX_DELAY) {
-            val newMaxDelay = Try {
-                Utils.delayStrToMillis(args.newMaxDelay)
-            }.map { args.newMaxDelay }.getIfSuccessOrElse { AppSettings.defaultMaxDelay }
-            saveApplicationSettings(getApplicationSettings().copy(maxDelay = newMaxDelay))
-            maxDelay.set(newMaxDelay)
-            newMaxDelay
-        }
-    }
-
-    private val maxDelay: AtomicReference<String?> = AtomicReference(null)
-    @BeMethod
-    @Synchronized
-    fun readMaxDelay(): BeRespose<String> {
-        return BeRespose(ErrorCode.READ_MAX_DELAY) {
-            if (maxDelay.get() == null) {
-                maxDelay.set(getApplicationSettings().maxDelay?:AppSettings.defaultMaxDelay)
-            }
-            maxDelay.get()!!
-        }
-    }
-
     private fun createDefaultKeyStorFile(): File {
-        var result: File?
         val keystoreDir = Utils.getKeystoreDir(context)
         val defaultCertFileName = "default-cert-ktor.bks"
-        result = File(keystoreDir, defaultCertFileName)
+        val result = File(keystoreDir, defaultCertFileName)
         context.getAssets().open("ktor-cert/$defaultCertFileName").use { defaultCert ->
             FileOutputStream(result).use { out ->
                 defaultCert.copyTo(out)
