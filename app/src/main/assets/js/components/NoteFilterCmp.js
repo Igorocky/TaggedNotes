@@ -241,7 +241,7 @@ const NoteFilterCmp = ({
                         minimized,
                     })
                 ),
-                renderMinimized: () => `Created on or after: ${createdOnOrAfter.getFullYear()} ${ALL_MONTHS[createdOnOrAfter.getMonth()]} ${createdOnOrAfter.getDate()}`,
+                renderMinimized: () => `Created: [${createdOnOrAfter.getFullYear()} ${ALL_MONTHS[createdOnOrAfter.getMonth()]} ${createdOnOrAfter.getDate()}, ${INFINITY_CHAR})`,
                 getFilterValues: () => ({createdFrom: startOfDay(createdOnOrAfter).getTime()})
             }
         }
@@ -261,8 +261,8 @@ const NoteFilterCmp = ({
                         minimized,
                     })
                 ),
-                renderMinimized: () => `Created on or before: ${createdOnOrBefore.getFullYear()} ${ALL_MONTHS[createdOnOrBefore.getMonth()]} ${createdOnOrBefore.getDate()}`,
-                getFilterValues: () => ({createdTill: addDays(startOfDay(createdOnOrBefore),1).getTime()})
+                renderMinimized: () => `Created: (-${INFINITY_CHAR}, ${createdOnOrBefore.getFullYear()} ${ALL_MONTHS[createdOnOrBefore.getMonth()]} ${createdOnOrBefore.getDate()}]`,
+                getFilterValues: () => ({createdTill: addMillis(addDays(startOfDay(createdOnOrBefore),1),-1).getTime()})
             }
         }
     }

@@ -59,6 +59,10 @@ function addDays(date, daysToAdd) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate() + daysToAdd, date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds())
 }
 
+function addMillis(date, millisToAdd) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds() + millisToAdd)
+}
+
 function randomInt(min, max) {
     return min + Math.floor(Math.random()*((max-min)+1))
 }
