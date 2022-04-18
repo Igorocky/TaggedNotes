@@ -3,6 +3,7 @@
 const INFINITY_CHAR = '\u{0221E}'
 
 const AVAILABLE_NOTE_FILTERS = {
+    HAS_NO_TAGS:'HAS_NO_TAGS',
     INCLUDE_TAGS:'INCLUDE_TAGS',
     EXCLUDE_TAGS:'EXCLUDE_TAGS',
     CREATED_ON_OR_AFTER:'CREATED_ON_OR_AFTER',
@@ -12,6 +13,7 @@ const AVAILABLE_NOTE_FILTERS = {
 }
 
 const NOTE_FILTER_SORT_ORDER = {
+    HAS_NO_TAGS:0,
     INCLUDE_TAGS:1,
     EXCLUDE_TAGS:2,
     CREATED_ON_OR_AFTER:3,
@@ -143,6 +145,22 @@ const NoteFilterCmp = ({
             ),
             RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, title)
         )
+    }
+
+    function createHasNoTagsFilterObject() {
+        const filterName = af.HAS_NO_TAGS
+        return {
+            [filterName]: {
+                displayName: 'Notes without tags',
+                render: () => RE.Container.col.top.left({},{},
+                    renderFilterHeader({filterName, onRemoved: () => null, title: 'Notes without tags.'}),
+                ),
+                renderMinimized: () => RE.Fragment({},
+                    'Notes without tags.',
+                ),
+                getFilterValues: () => ({hasNoTags: true})
+            }
+        }
     }
 
     function createTagsToIncludeFilterObject() {
@@ -323,6 +341,7 @@ const NoteFilterCmp = ({
     }
 
     const allFilterObjects = {
+        ...createHasNoTagsFilterObject(),
         ...createTagsToIncludeFilterObject(),
         ...createTagsToExcludeFilterObject(),
         ...createCreatedOnOrAfterFilterObject(),
@@ -353,6 +372,7 @@ const NoteFilterCmp = ({
         let filterNames = hasValue(allowedFilters)
             ? allowedFilters
             : [
+                af.HAS_NO_TAGS,
                 af.INCLUDE_TAGS,
                 af.EXCLUDE_TAGS,
                 af.CREATED_ON_OR_AFTER,
@@ -395,9 +415,14 @@ const NoteFilterCmp = ({
     }
 
     function getSelectedFilter() {
-        return getEffectiveSelectedFilterNames()
-            .map(filterName => allFilterObjects[filterName])
-            .reduce((acc,elem) => ({...acc,...elem.getFilterValues()}), {})
+        return {
+            ...(
+                getEffectiveSelectedFilterNames()
+                    .map(filterName => allFilterObjects[filterName])
+                    .reduce((acc, elem) => ({...acc, ...elem.getFilterValues()}), {})
+            ),
+            filtersSelected
+        }
     }
 
     function doSubmit() {

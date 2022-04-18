@@ -61,6 +61,7 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
                && (hasNoValue(filter.textContains) || filter.textContains.trim().length === 0)
                && hasNoValue(filter.createdFrom)
                && hasNoValue(filter.createdTill)
+               && filter.hasNoTags !== true
     }
 
     function renderListOfNotes() {
