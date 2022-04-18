@@ -5,7 +5,7 @@ function usePagination({items, pageSize, onlyArrowButtons = false}) {
 
     const itemsAmount = items?.length ?? 0
     const numberOfPages = Math.floor(itemsAmount / pageSize) + (itemsAmount % pageSize > 0 ? 1 : 0)
-    if (currPageIdx >= numberOfPages) {
+    if (currPageIdx > 0 && currPageIdx >= numberOfPages) {
         currPageIdx = numberOfPages-1
         setCurrPageIdx(currPageIdx)
     }
