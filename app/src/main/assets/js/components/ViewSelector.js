@@ -10,7 +10,6 @@ const HTTP_SERVER_VIEW = 'HTTP_SERVER_VIEW'
 
 const TAGS_VIEW = 'TAGS_VIEW'
 const NOTES_SEARCH_VIEW = 'NOTES_SEARCH_VIEW'
-const CREATE_NOTE_VIEW = 'CREATE_NOTE_VIEW'
 
 const VIEWS = {}
 function addView({name, component, params}) {
@@ -26,7 +25,6 @@ addView({name: HTTP_SERVER_VIEW, component: HttpServerView})
 
 addView({name: TAGS_VIEW, component: TagsView})
 addView({name: NOTES_SEARCH_VIEW, component: NotesSearchView})
-addView({name: CREATE_NOTE_VIEW, component: CreateNoteView})
 
 const ViewSelector = ({}) => {
     const [currentViewUrl, setCurrentViewUrl] = useState(null)
@@ -73,17 +71,15 @@ const ViewSelector = ({}) => {
         const selectedViewName = getSelectedView()?.name
         const bgColor = viewName => viewName == selectedViewName ? '#00d0ff' : undefined
         const additionalButtons = [
-            [
-                {key:TAGS_VIEW, viewName:TAGS_VIEW, iconName:'sell'},
-                {key:NOTES_SEARCH_VIEW, viewName:NOTES_SEARCH_VIEW, iconName:'search'},
-                {key:BACKUPS_VIEW, viewName:BACKUPS_VIEW, iconName:'archive'},
-                IS_IN_WEBVIEW?{key:HTTP_SERVER_VIEW, viewName:HTTP_SERVER_VIEW, iconName:'reset_tv'}:null,
-            ].filter(e=>hasValue(e))
+            [].filter(e=>hasValue(e))
         ]
         const buttons = [[
-            {key:CREATE_NOTE_VIEW, viewName:CREATE_NOTE_VIEW, iconName:"add"},
-            getOpenedViewButton(),
-            {key:'more', iconName:"more_horiz", onClick: () => setShowMoreControlButtons(old => !old)},
+            {key:NOTES_SEARCH_VIEW, viewName:NOTES_SEARCH_VIEW, iconName:'search'},
+            {key:TAGS_VIEW, viewName:TAGS_VIEW, iconName:'sell'},
+            {key:BACKUPS_VIEW, viewName:BACKUPS_VIEW, iconName:'archive'},
+            IS_IN_WEBVIEW?{key:HTTP_SERVER_VIEW, viewName:HTTP_SERVER_VIEW, iconName:'reset_tv'}:null,
+            // getOpenedViewButton(),
+            // {key:'more', iconName:"more_horiz", onClick: () => setShowMoreControlButtons(old => !old)},
         ].filter(e=>hasValue(e))]
 
         if (showMoreControlButtons) {
