@@ -3,8 +3,8 @@
 const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
     const {renderMessagePopup, showMessage, confirmAction, showError, showMessageWithProgress} = useMessagePopup()
 
+    const [filter, setFilter] = useState({})
     const [isEditFilterMode, setIsEditFilterMode] = useState(true)
-    const filterStateRef = useRef(null)
 
     const {allTags, allTagsMap, errorLoadingTags} = useTags()
 
@@ -132,9 +132,10 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
         return re(NoteFilterCmp, {
             allTags,
             allTagsMap,
-            stateRef: filterStateRef,
+            filter,
             onSubmit: filter => {
                 setIsEditFilterMode(false)
+                setFilter(filter)
                 reloadNotes({filter})
             },
             minimized: !isEditFilterMode,

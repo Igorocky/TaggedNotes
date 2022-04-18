@@ -28,7 +28,7 @@ const AVAILABLE_SORT_DIR = {
 }
 
 const NoteFilterCmp = ({
-                                    allTags, allTagsMap, initialState, stateRef, onSubmit, minimized,
+                                    allTags, allTagsMap, filter, onSubmit, minimized,
                                     submitButtonIconName = 'search',
                                     allowedFilters, defaultFilters = [AVAILABLE_NOTE_FILTERS.INCLUDE_TAGS, AVAILABLE_NOTE_FILTERS.EXCLUDE_TAGS],
                                     objUpdateCounter
@@ -41,39 +41,23 @@ const NoteFilterCmp = ({
     const [objToTagsMap, setObjToTagsMap] = useState(null)
     const [errorLoadingObjToTagsMap, setErrorLoadingObjToTagsMap] = useState(null)
 
-    const [filtersSelected, setFiltersSelected] = useState(initialState?.filtersSelected??defaultFilters)
-    const [focusedFilter, setFocusedFilter] = useState(initialState?.focusedFilter??filtersSelected[0])
+    const [filtersSelected, setFiltersSelected] = useState(filter?.filtersSelected??defaultFilters)
+    const [focusedFilter, setFocusedFilter] = useState(filter?.focusedFilter??filtersSelected[0])
 
-    const [tagsToInclude, setTagsToInclude] = useState(initialState?.tagsToInclude??[])
-    const [tagsToExclude, setTagsToExclude] = useState(initialState?.tagsToExclude??[])
-    const [remainingTags, setRemainingTags] = useState([])
+    const [tagIdsToInclude, setTagIdsToInclude] = useState(filter?.tagIdsToInclude??[])
+    const tagsToInclude = tagIdsToInclude?.map(id => allTagsMap[id])
+    const [tagIdsToExclude, setTagIdsToExclude] = useState(filter?.tagIdsToExclude??[])
+    const tagsToExclude = tagIdsToExclude?.map(id => allTagsMap[id])
+    const [remainingTagIds, setRemainingTagIds] = useState([])
+    const remainingTags = remainingTagIds?.map(id => allTagsMap[id])
 
-    const [createdOnOrAfter, setCreatedOnOrAfter] = useState(() => initialState?.createdOnOrAfter ? new Date(initialState?.createdOnOrAfter) : new Date())
-    const [createdOnOrBefore, setCreatedOnOrBefore] = useState(() => initialState?.createdOnOrBefore ? new Date(initialState?.createdOnOrBefore) : new Date())
+    const [createdOnOrAfter, setCreatedOnOrAfter] = useState(() => hasValue(filter?.createdFrom) ? new Date(filter.createdFrom) : new Date())
+    const [createdOnOrBefore, setCreatedOnOrBefore] = useState(() => hasValue(filter?.createdTill) ? new Date(filter.createdTill) : new Date())
 
-    const [textContains, setTextContains] = useState(initialState?.textContains??'')
+    const [textContains, setTextContains] = useState(filter?.textContains??'')
 
-    const [sortBy, setSortBy] = useState(initialState?.sortBy??sb.TIME_CREATED)
-    const [sortDir, setSortDir] = useState(initialState?.sortDir??sd.DESC)
-
-    if (stateRef) {
-        stateRef.current = {}
-        stateRef.current.filtersSelected = filtersSelected
-        stateRef.current.focusedFilter = focusedFilter
-        stateRef.current.tagsToInclude = tagsToInclude
-        stateRef.current.tagsToExclude = tagsToExclude
-        stateRef.current.createdOnOrAfter = createdOnOrAfter.getTime()
-        stateRef.current.createdOnOrBefore = createdOnOrBefore.getTime()
-        stateRef.current.textContains = textContains
-        stateRef.current.sortBy = sortBy
-        stateRef.current.sortDir = sortDir
-    }
-
-    useEffect(() => {
-        if (initialState) {
-            doSubmit()
-        }
-    }, [])
+    const [sortBy, setSortBy] = useState(filter?.sortBy??sb.TIME_CREATED)
+    const [sortDir, setSortDir] = useState(filter?.sortDir??sd.DESC)
 
     useEffect(async () => {
         const res = await be.getObjToTagMapping()
@@ -89,22 +73,22 @@ const NoteFilterCmp = ({
         if (objToTagsMap) {
             recalculateRemainingTags()
         }
-    }, [objToTagsMap, tagsToInclude, tagsToExclude])
+    }, [objToTagsMap, tagIdsToInclude, tagIdsToExclude])
 
     function recalculateRemainingTags() {
         const remainingTagIds = []
         for (const objId in objToTagsMap) {
             const objTagIds = objToTagsMap[objId]
             let objPassed = true
-            for (const tag of tagsToInclude) {
-                if (!objTagIds.includes(tag.id)) {
+            for (const tagId of tagIdsToInclude) {
+                if (!objTagIds.includes(tagId)) {
                     objPassed = false
                     break
                 }
             }
             if (objPassed) {
-                for (const tag of tagsToExclude) {
-                    if (objTagIds.includes(tag.id)) {
+                for (const tagId of tagIdsToExclude) {
+                    if (objTagIds.includes(tagId)) {
                         objPassed = false
                         break
                     }
@@ -114,13 +98,11 @@ const NoteFilterCmp = ({
                 }
             }
         }
-        const tagIdsToInclude = tagsToInclude.map(t=>t.id)
-        const tagIdsToExclude = tagsToExclude.map(t=>t.id)
-        const remainingTags = remainingTagIds
-            .distinct()
-            .filter(tagId => !tagIdsToInclude.includes(tagId) && !tagIdsToExclude.includes(tagId))
-            .map(tagId => allTagsMap[tagId])
-        setRemainingTags(remainingTags)
+        setRemainingTagIds(
+            remainingTagIds
+                .distinct()
+                .filter(tagId => !tagIdsToInclude.includes(tagId) && !tagIdsToExclude.includes(tagId))
+        )
     }
 
     function addFilter(name) {
@@ -152,15 +134,15 @@ const NoteFilterCmp = ({
             [filterName]: {
                 displayName: 'Tags to include',
                 render: () => RE.Container.col.top.left({},{},
-                    renderFilterHeader({filterName, onRemoved: () => setTagsToInclude([]), title: 'Include:'}),
+                    renderFilterHeader({filterName, onRemoved: () => setTagIdsToInclude([]), title: 'Include:'}),
                     re(TagSelector,{
                         allTags: remainingTags,
                         selectedTags: tagsToInclude,
                         onTagRemoved:tag=>{
-                            setTagsToInclude(prev=>prev.filter(t=>t.id!==tag.id))
+                            setTagIdsToInclude(prev=>prev.filter(id=>id!==tag.id))
                         },
                         onTagSelected:tag=>{
-                            setTagsToInclude(prev=>[...prev,tag])
+                            setTagIdsToInclude(prev=>[...prev,tag.id])
                         },
                         label: 'Include',
                         color:'primary',
@@ -172,7 +154,7 @@ const NoteFilterCmp = ({
                     'Include: ',
                     renderListOfTags({tags: tagsToInclude, color:'blue'})
                 ),
-                getFilterValues: () => ({tagIdsToInclude: tagsToInclude.map(t=>t.id)})
+                getFilterValues: () => ({tagIdsToInclude})
             }
         }
     }
@@ -184,15 +166,15 @@ const NoteFilterCmp = ({
             [filterName]: {
                 displayName: 'Tags to exclude',
                 render: () => RE.Container.col.top.left({},{},
-                    renderFilterHeader({filterName, onRemoved: () => setTagsToExclude([]), title: 'Exclude:'}),
+                    renderFilterHeader({filterName, onRemoved: () => setTagIdsToExclude([]), title: 'Exclude:'}),
                     re(TagSelector,{
                         allTags: remainingTags,
                         selectedTags: tagsToExclude,
                         onTagRemoved:tag=>{
-                            setTagsToExclude(prev=>prev.filter(t=>t.id!==tag.id))
+                            setTagIdsToExclude(prev=>prev.filter(id=>id!==tag.id))
                         },
                         onTagSelected:tag=>{
-                            setTagsToExclude(prev=>[...prev,tag])
+                            setTagIdsToExclude(prev=>[...prev,tag.id])
                         },
                         label: 'Exclude',
                         color:'secondary',
@@ -204,7 +186,7 @@ const NoteFilterCmp = ({
                     'Exclude: ',
                     renderListOfTags({tags: tagsToExclude, color:'red'})
                 ),
-                getFilterValues: () => ({tagIdsToExclude: tagsToExclude.map(t=>t.id)})
+                getFilterValues: () => ({tagIdsToExclude})
             }
         }
     }
@@ -276,8 +258,8 @@ const NoteFilterCmp = ({
                         },
                     }))
                 ),
-                renderMinimized: () => `Text contains: "${textContains}"`,
-                getFilterValues: () => ({textContains: textContains})
+                renderMinimized: () => `Text contains: "${textContains.trim()}"`,
+                getFilterValues: () => ({textContains: textContains.trim()})
             }
         }
     }
@@ -383,8 +365,8 @@ const NoteFilterCmp = ({
     function getEffectiveSelectedFilterNames() {
         return filtersSelected
             .filter(filterName =>
-                (filterName !== af.INCLUDE_TAGS || tagsToInclude.length)
-                && (filterName !== af.EXCLUDE_TAGS || tagsToExclude.length)
+                (filterName !== af.INCLUDE_TAGS || tagIdsToInclude.length)
+                && (filterName !== af.EXCLUDE_TAGS || tagIdsToExclude.length)
                 && (filterName !== af.TEXT_CONTAINS || textContains.trim().length)
             )
     }
