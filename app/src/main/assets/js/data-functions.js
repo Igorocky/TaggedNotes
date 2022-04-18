@@ -222,15 +222,19 @@ function createObj(obj) {
         ...obj,
         set: (attr, value) => {
             // console.log(`Setting in object: attr = ${attr}, value = ${value}`)
-            return createObj({...obj, [attr]: value})
+            if (isObject(attr)) {
+                return createObj({...obj, ...attr})
+            } else {
+                return createObj({...obj, [attr]: value})
+            }
         },
         attr: (...attrs) => attrs.reduce((o,a)=>({...o,[a]:obj[a]}), {}),
         map: mapper => {
-            const newObj = mapper(self)
-            if (isObject(newObj)) {
-                return createObj(newObj)
+            const mapResult = mapper(self)
+            if (isObject(mapResult)) {
+                return createObj(mapResult)
             } else {
-                return newObj
+                return mapResult
             }
         }
     }
@@ -239,12 +243,12 @@ function createObj(obj) {
 
 function objectHolder(obj) {
     return {
-        get: (attr) => attr?obj[attr]:obj,
+        get: attr => hasValue(attr)?obj[attr]:obj,
         set: (attr, value) => {
             // console.log(`Setting in holder: attr = ${attr}, value = ${value}`)
             obj = obj.set(attr, value)
         },
-        setObj: (newObj) => {
+        setObj: newObj => {
             obj = newObj
         },
         attr: (...attrs) => obj.attr(...attrs),
