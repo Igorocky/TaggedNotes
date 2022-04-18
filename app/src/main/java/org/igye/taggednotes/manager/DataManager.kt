@@ -354,6 +354,7 @@ class DataManager(
     }
 
     data class ReadNotesByFilterArgs(
+        val hasNoTags: Boolean? = null,
         val tagIdsToInclude: Set<Long>? = null,
         val tagIdsToExclude: Set<Long>? = null,
         val textContains: String? = null,
@@ -399,6 +400,9 @@ class DataManager(
         }
         if (args.createdTill != null) {
             whereFilters.add("o.${o.createdAt} <= ${args.createdTill}")
+        }
+        if (args.hasNoTags != null && args.hasNoTags) {
+            whereFilters.add("o.tagIds is null")
         }
         var orderBy = ""
         if (args.sortBy != null) {

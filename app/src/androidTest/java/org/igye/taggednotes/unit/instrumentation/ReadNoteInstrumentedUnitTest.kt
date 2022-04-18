@@ -211,6 +211,24 @@ class ReadNoteInstrumentedUnitTest: InstrumentedTestBase() {
     }
 
     @Test
+    fun readNotesByFilter_returns_notes_without_tags_if_hasNotTags_filter_was_specified() {
+        //given
+        val tagId1 = createTag(tagId = 1, name = "t1")
+        val tagId2 = createTag(tagId = 2, name = "t2")
+        val tagId3 = createTag(tagId = 3, name = "t3")
+        val note1 = createNote(noteId = 1L, tagIds = listOf(tagId1, tagId2))
+        val note2 = createNote(noteId = 2L, tagIds = listOf())
+        val note3 = createNote(noteId = 3L, tagIds = listOf(tagId2, tagId3))
+        val note4 = createNote(noteId = 4L, tagIds = listOf())
+
+        //when
+        val foundNotes = dm.readNotesByFilter(ReadNotesByFilterArgs(hasNoTags = true))
+
+        //then
+        assertSearchResult(listOf(note2, note4), foundNotes)
+    }
+
+    @Test
     fun readNotesByFilter_filters_by_tags_to_include() {
         val tagId1 = createTag(tagId = 1, name = "t1")
         val tagId2 = createTag(tagId = 2, name = "t2")
