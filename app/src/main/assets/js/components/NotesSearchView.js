@@ -1,15 +1,19 @@
 "use strict";
 
+const USER_INPUT_TEXT_FIELD = 'user-input'
+
 const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
     const {renderMessagePopup, showMessage, confirmAction, showError, showMessageWithProgress} = useMessagePopup()
 
     const [filter, setFilter] = useState({})
-    const [isEditFilterMode, setIsEditFilterMode] = useState(true)
+    const [isEditFilterMode, setIsEditFilterMode] = useState(false)
 
     const {allTags, allTagsMap, errorLoadingTags} = useTags()
 
     const [foundNotes, setFoundNotes] = useState(null)
     const [errorLoadingNotes, setErrorLoadingNotes] = useState(null)
+
+    const [newText, setNewText] = useState('')
 
     const pageSize = 100
     const {setCurrPageIdx,renderPaginationControls,pageFirstItemIdx,pageLastItemIdx} =
@@ -19,6 +23,12 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
     const [noteToEdit, setNoteToEdit] = useState(null)
 
     const [noteUpdateCounter, setNoteUpdateCounter] = useState(0)
+
+    useEffect(() => {
+        if (hasValue(allTagsMap)) {
+            reloadNotes({filter})
+        }
+    }, [allTagsMap])
 
     useEffect(() => {
         if (hasValue(focusedNoteId) && hasNoValue(noteToEdit)) {
@@ -161,6 +171,66 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
         })
     }
 
+    function createNewNoteIsAllowed() {
+        return newText.trim().length > 0
+    }
+
+    async function createNewNote() {
+        if (createNewNoteIsAllowed()) {
+            const closeProgressIndicatorSave = showMessageWithProgress({text: 'Saving new note...'})
+            const resSave = await be.createNote({text: newText, tagIds: filter.tagIdsToInclude??[]})
+            closeProgressIndicatorSave()
+            if (resSave.err) {
+                await showError(resSave.err)
+            } else {
+                const newNoteId = resSave.data
+                setNewText('')
+                setNoteUpdateCounter(c => c + 1)
+                const closeProgressIndicatorReload = showMessageWithProgress({text: 'Reloading new note...'})
+                const res = await be.readNoteById({noteId: newNoteId})
+                closeProgressIndicatorReload()
+                if (res.err) {
+                    await showError(res.err)
+                } else {
+                    setFoundNotes(prev => [res.data, ...prev])
+                }
+            }
+            document.getElementById(USER_INPUT_TEXT_FIELD)?.focus()
+        }
+    }
+
+    function renderAddNoteControls() {
+        const disabled = !createNewNoteIsAllowed()
+        return RE.Container.row.left.center({},{},
+            textField({
+                id: USER_INPUT_TEXT_FIELD,
+                autoFocus: true,
+                value: newText,
+                label: 'New note',
+                variant: 'outlined',
+                multiline: true,
+                maxRows: 10,
+                size: 'small',
+                inputProps: {cols:24, tabIndex:1},
+                style: {},
+                onChange: event => {
+                    setNewText(event.nativeEvent.target.value)
+                },
+                onKeyUp: event => {
+                    if (event.ctrlKey && event.keyCode === ENTER_KEY_CODE) {
+                        createNewNote()
+                    }
+                },
+            }),
+            iconButton({
+                iconName:'send',
+                onClick: createNewNote,
+                disabled,
+                iconStyle:{color:disabled?'lightgrey':'blue'}
+            })
+        )
+    }
+
     function renderPageContent() {
         if (errorLoadingTags) {
             return RE.Fragment({},
@@ -168,6 +238,10 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
             )
         } else if (hasNoValue(allTags) || hasNoValue(allTagsMap)) {
             return 'Loading tags...'
+        } else if (errorLoadingNotes) {
+            return RE.Fragment({},
+                `An error occurred during loading of notes: [${errorLoadingNotes.code}] - ${errorLoadingNotes.msg}`,
+            )
         } else if (hasValue(noteToEdit)) {
             return re(EditNoteCmp, {
                 allTags, allTagsMap, note: noteToEdit,
@@ -191,8 +265,11 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
                     setFoundNotes(prev => prev.filter(note => note.id !== noteToEdit.id))
                 }
             })
+        } else if (isEditFilterMode) {
+            return renderFilter()
         } else {
             return RE.Container.col.top.left({style: {marginTop: '5px'}}, {style: {marginBottom: '10px'}},
+                renderAddNoteControls(),
                 renderFilter(),
                 renderListOfNotes()
             )
