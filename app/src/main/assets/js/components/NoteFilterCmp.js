@@ -1,5 +1,7 @@
 "use strict";
 
+const INFINITY_CHAR = '\u{0221E}'
+
 const AVAILABLE_NOTE_FILTERS = {
     INCLUDE_TAGS:'INCLUDE_TAGS',
     EXCLUDE_TAGS:'EXCLUDE_TAGS',
@@ -212,9 +214,9 @@ const NoteFilterCmp = ({
         const minimized = filterName !== focusedFilter
         return {
             [filterName]: {
-                displayName: 'Created on or after',
+                displayName: `[date, ${INFINITY_CHAR})`,
                 render: () => RE.Container.col.top.left({},{},
-                    renderFilterHeader({filterName, onRemoved: () => setCreatedOnOrAfter(new Date()), title: 'Created on or after:'}),
+                    renderFilterHeader({filterName, onRemoved: () => setCreatedOnOrAfter(new Date()), title: `[date, ${INFINITY_CHAR}):`}),
                     re(DateSelector,{
                         selectedDate: createdOnOrAfter,
                         onDateSelected: newDate => setCreatedOnOrAfter(newDate),
@@ -232,9 +234,9 @@ const NoteFilterCmp = ({
         const minimized = filterName !== focusedFilter
         return {
             [filterName]: {
-                displayName: 'Created on or before',
+                displayName: `(-${INFINITY_CHAR}, date]`,
                 render: () => RE.Container.col.top.left({},{},
-                    renderFilterHeader({filterName, onRemoved: () => setCreatedOnOrBefore(new Date()), title: 'Created on or before:'}),
+                    renderFilterHeader({filterName, onRemoved: () => setCreatedOnOrBefore(new Date()), title: `(-${INFINITY_CHAR}, date]:`}),
                     re(DateSelector,{
                         selectedDate: createdOnOrBefore,
                         onDateSelected: newDate => setCreatedOnOrBefore(newDate),
