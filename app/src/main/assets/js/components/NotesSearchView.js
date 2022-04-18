@@ -157,37 +157,33 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
             )
         } else if (hasNoValue(allTags) || hasNoValue(allTagsMap)) {
             return 'Loading tags...'
-        } else {
-            let notesOrEditCmp
-            if (hasValue(noteToEdit)) {
-                notesOrEditCmp = re(EditNoteCmp,{
-                    allTags, allTagsMap, note:noteToEdit,
-                    onCancelled: () => setNoteToEdit(null),
-                    onSaved: async () => {
-                        setNoteUpdateCounter(prev => prev + 1)
-                        const closeProgressIndicator = showMessageWithProgress({text: 'Reloading changed note...'})
-                        const res = await be.readNoteById({noteId: noteToEdit.id})
-                        closeProgressIndicator()
-                        if (res.err) {
-                            await showError(res.err)
-                            openFilter()
-                        } else {
-                            setNoteToEdit(null)
-                            setFoundNotes(prev => prev.map(note => note.id === noteToEdit.id ? res.data : note))
-                        }
-                    },
-                    onDeleted: () => {
-                        setNoteUpdateCounter(prev => prev + 1)
+        } else if (hasValue(noteToEdit)) {
+            return re(EditNoteCmp, {
+                allTags, allTagsMap, note: noteToEdit,
+                onCancelled: () => setNoteToEdit(null),
+                onSaved: async () => {
+                    setNoteUpdateCounter(prev => prev + 1)
+                    const closeProgressIndicator = showMessageWithProgress({text: 'Reloading changed note...'})
+                    const res = await be.readNoteById({noteId: noteToEdit.id})
+                    closeProgressIndicator()
+                    if (res.err) {
+                        await showError(res.err)
+                        openFilter()
+                    } else {
                         setNoteToEdit(null)
-                        setFoundNotes(prev => prev.filter(note => note.id !== noteToEdit.id))
+                        setFoundNotes(prev => prev.map(note => note.id === noteToEdit.id ? res.data : note))
                     }
-                })
-            } else {
-                notesOrEditCmp = renderListOfNotes()
-            }
-            return RE.Container.col.top.left({style: {marginTop:'5px'}},{style:{marginBottom:'10px'}},
+                },
+                onDeleted: () => {
+                    setNoteUpdateCounter(prev => prev + 1)
+                    setNoteToEdit(null)
+                    setFoundNotes(prev => prev.filter(note => note.id !== noteToEdit.id))
+                }
+            })
+        } else {
+            return RE.Container.col.top.left({style: {marginTop: '5px'}}, {style: {marginBottom: '10px'}},
                 renderFilter(),
-                notesOrEditCmp
+                renderListOfNotes()
             )
         }
     }

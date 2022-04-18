@@ -1,16 +1,13 @@
 "use strict";
 
-const EditNoteCmp = ({allTags, allTagsMap, card, reducedMode = false, onCancelled, onSaved, onDeleted}) => {
+const EditNoteCmp = ({allTags, allTagsMap, note, onCancelled, onSaved, onDeleted}) => {
     const {renderMessagePopup, showError, confirmAction, showMessageWithProgress} = useMessagePopup()
 
-    const [textToTranslate, setTextToTranslate] = useState(card.textToTranslate)
-    const [translation, setTranslation] = useState(card.translation)
-    const [paused, setPaused] = useState(card.paused)
-    const [tagIds, setTagIds] = useState(card.tagIds)
-    const [delay, setDelay] = useState(card.schedule.delay)
-    const createdAt = useMemo(() => new Date(card.createdAt), [card.createdAt])
+    const [text, setText] = useState(note.text)
+    const [tagIds, setTagIds] = useState(note.tagIds)
+    const createdAt = useMemo(() => new Date(note.createdAt), [note.id])
 
-    const {renderValidationHistory} = useTranslateCardHistory({cardId:card.id})
+    const {renderHistory} = useNoteHistory({noteId:note.id})
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -24,12 +21,9 @@ const EditNoteCmp = ({allTags, allTagsMap, card, reducedMode = false, onCancelle
         }
     }
 
-    const textToTranslateIsModified = isModified({initialValue: card.textToTranslate, currValue:textToTranslate})
-    const translationIsModified = isModified({initialValue: card.translation, currValue:translation})
-    const pausedIsModified = isModified({initialValue: card.paused, currValue:paused})
-    const tagIdsIsModified = isModified({initialValue: card.tagIds, currValue:tagIds})
-    const delayIsModified = isModified({initialValue: card.schedule.delay, currValue:delay})
-    const dataIsModified = textToTranslateIsModified || translationIsModified || pausedIsModified || tagIdsIsModified || delayIsModified
+    const textIsModified = isModified({initialValue: note.text, currValue:text})
+    const tagIdsIsModified = isModified({initialValue: note.tagIds, currValue:tagIds})
+    const dataIsModified = textIsModified || tagIdsIsModified
 
     async function doCancel() {
         if (!dataIsModified || dataIsModified && await confirmAction({text: 'Your changes will be lost.'})) {
@@ -39,14 +33,10 @@ const EditNoteCmp = ({allTags, allTagsMap, card, reducedMode = false, onCancelle
 
     async function doSave() {
         const closeProgressIndicator = showMessageWithProgress({text: 'Saving changes...'})
-        const res = await be.updateTranslateCard({
-            cardId: card.id,
-            paused: pausedIsModified?paused:null,
-            delay: delayIsModified?delay:null,
-            recalculateDelay: delayIsModified,
+        const res = await be.updateNote({
+            noteId: note.id,
             tagIds: tagIdsIsModified?tagIds:null,
-            textToTranslate: textToTranslateIsModified?textToTranslate:null,
-            translation: translationIsModified ? translation : null,
+            text: textIsModified?text:null,
         })
         closeProgressIndicator()
         if (res.err) {
@@ -59,7 +49,7 @@ const EditNoteCmp = ({allTags, allTagsMap, card, reducedMode = false, onCancelle
     async function doDelete() {
         if (await confirmAction({text: 'Delete this card?', okBtnColor: 'secondary'})) {
             const closeProgressIndicator = showMessageWithProgress({text: 'Deleting...'})
-            const res = await be.deleteTranslateCard({cardId:card.id})
+            const res = await be.deleteNote({noteId:note.id})
             closeProgressIndicator()
             if (res.err) {
                 await showError(res.err)
@@ -79,36 +69,23 @@ const EditNoteCmp = ({allTags, allTagsMap, card, reducedMode = false, onCancelle
         re(EditNoteForm,{
             allTags, allTagsMap,
 
-            paused,
-            pausedOnChange: newValue=>setPaused(newValue),
-            pausedBgColor: getBgColor(pausedIsModified),
+            text: text,
+            textOnChange: newValue => setText(newValue),
+            textBgColor: getBgColor(textIsModified),
 
-            textToTranslate,
-            textToTranslateOnChange: newValue => setTextToTranslate(newValue),
-            textToTranslateBgColor: getBgColor(textToTranslateIsModified),
-
-            translation: reducedMode ? null : translation,
-            translationOnChange: newValue => setTranslation(newValue),
-            translationBgColor: getBgColor(translationIsModified),
-
-            delay: reducedMode ? null : delay,
-            delayOnChange: newValue => setDelay(newValue),
-            delayBgColor: getBgColor(delayIsModified),
-
-            tagIds: reducedMode ? null : tagIds,
+            tagIds: tagIds,
             tagIdsOnChange: newValue => setTagIds(newValue),
             tagIdsBgColor: getBgColor(tagIdsIsModified),
 
-            activatesIn: reducedMode ? null : card.activatesIn,
             createdAt,
 
             onSave: doSave,
-            saveDisabled: !dataIsModified || (textToTranslate.length === 0 || (!reducedMode && translation.length === 0)),
+            saveDisabled: !dataIsModified || (text.trim().length === 0),
 
             onCancel: doCancel,
             onDelete: doDelete
         }),
-        renderValidationHistory(),
+        renderHistory(),
         renderMessagePopup()
     )
 }
