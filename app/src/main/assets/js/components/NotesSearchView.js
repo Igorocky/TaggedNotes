@@ -128,16 +128,20 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
         setFocusedNoteId(null)
     }
 
+    function doSearch(filter) {
+        setIsEditFilterMode(false)
+        setFilter(filter)
+        reloadNotes({filter})
+    }
+
     function renderFilter() {
         return re(NoteFilterCmp, {
             allTags,
             allTagsMap,
             filter,
-            onSubmit: filter => {
-                setIsEditFilterMode(false)
-                setFilter(filter)
-                reloadNotes({filter})
-            },
+            onSubmit: doSearch,
+            onEdit: () => setIsEditFilterMode(true),
+            onClear: () => doSearch({}),
             minimized: !isEditFilterMode,
             noteUpdateCounter: noteUpdateCounter
         })

@@ -28,7 +28,7 @@ const AVAILABLE_SORT_DIR = {
 }
 
 const NoteFilterCmp = ({
-                                    allTags, allTagsMap, filter, onSubmit, minimized,
+                                    allTags, allTagsMap, filter, onSubmit, onEdit, onClear, minimized,
                                     submitButtonIconName = 'search',
                                     allowedFilters, defaultFilters = [AVAILABLE_NOTE_FILTERS.INCLUDE_TAGS, AVAILABLE_NOTE_FILTERS.EXCLUDE_TAGS],
                                     objUpdateCounter
@@ -41,23 +41,27 @@ const NoteFilterCmp = ({
     const [objToTagsMap, setObjToTagsMap] = useState(null)
     const [errorLoadingObjToTagsMap, setErrorLoadingObjToTagsMap] = useState(null)
 
-    const [filtersSelected, setFiltersSelected] = useState(filter?.filtersSelected??defaultFilters)
-    const [focusedFilter, setFocusedFilter] = useState(filter?.focusedFilter??filtersSelected[0])
+    const [filtersSelected, setFiltersSelected] = useState(defaultFilters)
+    const [focusedFilter, setFocusedFilter] = useState(filtersSelected[0])
 
-    const [tagIdsToInclude, setTagIdsToInclude] = useState(filter?.tagIdsToInclude??[])
+    const [tagIdsToInclude, setTagIdsToInclude] = useState([])
     const tagsToInclude = tagIdsToInclude?.map(id => allTagsMap[id])
-    const [tagIdsToExclude, setTagIdsToExclude] = useState(filter?.tagIdsToExclude??[])
+    const [tagIdsToExclude, setTagIdsToExclude] = useState([])
     const tagsToExclude = tagIdsToExclude?.map(id => allTagsMap[id])
     const [remainingTagIds, setRemainingTagIds] = useState([])
     const remainingTags = remainingTagIds?.map(id => allTagsMap[id])
 
-    const [createdOnOrAfter, setCreatedOnOrAfter] = useState(() => hasValue(filter?.createdFrom) ? new Date(filter.createdFrom) : new Date())
-    const [createdOnOrBefore, setCreatedOnOrBefore] = useState(() => hasValue(filter?.createdTill) ? new Date(filter.createdTill) : new Date())
+    const [createdOnOrAfter, setCreatedOnOrAfter] = useState(new Date())
+    const [createdOnOrBefore, setCreatedOnOrBefore] = useState(new Date())
 
-    const [textContains, setTextContains] = useState(filter?.textContains??'')
+    const [textContains, setTextContains] = useState('')
 
-    const [sortBy, setSortBy] = useState(filter?.sortBy??sb.TIME_CREATED)
-    const [sortDir, setSortDir] = useState(filter?.sortDir??sd.DESC)
+    const [sortBy, setSortBy] = useState(sb.TIME_CREATED)
+    const [sortDir, setSortDir] = useState(sd.DESC)
+
+    useEffect(() => {
+        initFromFilterObject(filter)
+    }, [])
 
     useEffect(async () => {
         const res = await be.getObjToTagMapping()
@@ -74,6 +78,18 @@ const NoteFilterCmp = ({
             recalculateRemainingTags()
         }
     }, [objToTagsMap, tagIdsToInclude, tagIdsToExclude])
+
+    function initFromFilterObject(filter) {
+        setFiltersSelected(filter?.filtersSelected??defaultFilters)
+        setFocusedFilter(filter?.focusedFilter??filtersSelected[0])
+        setTagIdsToInclude(filter?.tagIdsToInclude??[])
+        setTagIdsToExclude(filter?.tagIdsToExclude??[])
+        setCreatedOnOrAfter(() => hasValue(filter?.createdFrom) ? new Date(filter.createdFrom) : new Date())
+        setCreatedOnOrBefore(() => hasValue(filter?.createdTill) ? new Date(filter.createdTill) : new Date())
+        setTextContains(filter?.textContains??'')
+        setSortBy(filter?.sortBy??sb.TIME_CREATED)
+        setSortDir(filter?.sortDir??sd.DESC)
+    }
 
     function recalculateRemainingTags() {
         const remainingTagIds = []
@@ -299,6 +315,11 @@ const NoteFilterCmp = ({
         }
     }
 
+    function clearFilters() {
+        initFromFilterObject({})
+        onClear?.()
+    }
+
     const allFilterObjects = {
         ...createTagsToIncludeFilterObject(),
         ...createTagsToExcludeFilterObject(),
@@ -402,9 +423,15 @@ const NoteFilterCmp = ({
     if (minimized) {
         const filtersToRender = getEffectiveSelectedFilterNames().sortBy(n => NOTE_FILTER_SORT_ORDER[n])
         return RE.Paper({style:{padding:'5px'}},
-            filtersToRender.length ? RE.Container.col.top.left({},{},
-                filtersToRender.map(filterName => allFilterObjects[filterName].renderMinimized())
-            ) : 'All notes'
+            RE.Container.col.top.left({},{},
+                RE.Container.row.left.center({},{style:{marginRight:'20px'}},
+                    iconButton({iconName:'clear', onClick: clearFilters}),
+                    iconButton({iconName:'edit', onClick: onEdit}),
+                ),
+                filtersToRender.length
+                    ? filtersToRender.map(filterName => allFilterObjects[filterName].renderMinimized())
+                    : 'All notes'
+            )
         )
     } else {
         return RE.Fragment({},
