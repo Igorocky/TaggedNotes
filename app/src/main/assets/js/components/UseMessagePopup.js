@@ -64,40 +64,46 @@ function useMessagePopup() {
         )
     }
 
+    function openPopup(state) {
+        setStates(prev => [
+            ...prev,
+            state
+        ])
+    }
+
+    function closePopup({stateId}) {
+        setStates(prev => prev.filter(st => st[s.stateId] !== stateId))
+    }
+
+    // public ----------------------------------------
+
     function renderMessagePopup() {
         return states.map(st => renderMessagePopupForState({st}))
     }
 
-    function closeDialog({stateId}) {
-        setStates(prev => prev.filter(st => st[s.stateId] !== stateId))
-    }
-
-    async function confirmAction({text, cancelBtnText = 'cancel', okBtnText = 'ok', okBtnColor}) {
+    function confirmAction({text, cancelBtnText = 'cancel', okBtnText = 'ok', okBtnColor}) {
         return new Promise(resolve => {
             const stateId = stateCnt
             setStateCnt(prev => prev+1)
-            setStates(prev => [
-                ...prev,
-                s.new({
-                    [s.stateId]: stateId,
-                    [s.title]: null,
-                    [s.contentRenderer]: null,
-                    [s.text]: text,
-                    [s.cancelBtnText]: cancelBtnText,
-                    [s.onCancel]: () => {
-                        closeDialog({stateId})
-                        resolve(false)
-                    },
-                    [s.okBtnText]: okBtnText,
-                    [s.okBtnColor]: okBtnColor,
-                    [s.onOk]: () => {
-                        closeDialog({stateId})
-                        resolve(true)
-                    },
-                    [s.showProgress]: false,
-                    [s.additionalActionsRenderer]: null,
-                })
-            ])
+            openPopup(s.new({
+                [s.stateId]: stateId,
+                [s.title]: null,
+                [s.contentRenderer]: null,
+                [s.text]: text,
+                [s.cancelBtnText]: cancelBtnText,
+                [s.onCancel]: () => {
+                    closePopup({stateId})
+                    resolve(false)
+                },
+                [s.okBtnText]: okBtnText,
+                [s.okBtnColor]: okBtnColor,
+                [s.onOk]: () => {
+                    closePopup({stateId})
+                    resolve(true)
+                },
+                [s.showProgress]: false,
+                [s.additionalActionsRenderer]: null,
+            }))
         })
     }
 
@@ -105,68 +111,8 @@ function useMessagePopup() {
         return new Promise(resolve => {
             const stateId = stateCnt
             setStateCnt(prev => prev+1)
-            setStates(prev => [
-                ...prev,
-                s.new({
-                    [s.stateId]: stateId,
-                    [s.title]: null,
-                    [s.contentRenderer]: null,
-                    [s.text]: text,
-                    [s.cancelBtnText]: null,
-                    [s.onCancel]: null,
-                    [s.okBtnText]: okBtnText,
-                    [s.okBtnColor]: null,
-                    [s.onOk]: () => {
-                        closeDialog({stateId})
-                        resolve(true)
-                    },
-                    [s.showProgress]: false,
-                    [s.additionalActionsRenderer]: additionalActionsRenderer,
-                })
-            ])
-        })
-    }
 
-    async function showDialog({title, contentRenderer, cancelBtnText, cancelBtnResult = null, okBtnText = null, okBtnColor = null, okBtnResult = null}) {
-        return new Promise(resolve => {
-            const stateId = stateCnt
-            setStateCnt(prev => prev+1)
-            setStates(prev => [
-                ...prev,
-                s.new({
-                    [s.stateId]: stateId,
-                    [s.title]: title,
-                    [s.contentRenderer]: () => {
-                        return contentRenderer(dialogResult => {
-                            closeDialog({stateId})
-                            resolve(dialogResult)
-                        })
-                    },
-                    [s.text]: null,
-                    [s.cancelBtnText]: cancelBtnText,
-                    [s.onCancel]: () => {
-                        closeDialog({stateId})
-                        resolve(cancelBtnResult)
-                    },
-                    [s.okBtnText]: okBtnText,
-                    [s.okBtnColor]: okBtnColor,
-                    [s.onOk]: () => {
-                        closeDialog({stateId})
-                        resolve(okBtnResult)
-                    },
-                    [s.showProgress]: false,
-                    [s.additionalActionsRenderer]: null,
-                })
-            ])
-        })
-    }
-
-    function showMessageWithProgress({text, okBtnText = 'ok'}) {
-        const stateId = stateCnt
-        setStateCnt(prev => prev+1)
-        setStates(prev => [
-            ...prev,
-            s.new({
+            openPopup(s.new({
                 [s.stateId]: stateId,
                 [s.title]: null,
                 [s.contentRenderer]: null,
@@ -175,26 +121,80 @@ function useMessagePopup() {
                 [s.onCancel]: null,
                 [s.okBtnText]: okBtnText,
                 [s.okBtnColor]: null,
-                [s.onOk]: () => null,
-                [s.showProgress]: true,
+                [s.onOk]: () => {
+                    closePopup({stateId})
+                    resolve(true)
+                },
+                [s.showProgress]: false,
+                [s.additionalActionsRenderer]: additionalActionsRenderer,
+            }))
+        })
+    }
+
+    async function showDialog({title, contentRenderer, cancelBtnText, cancelBtnResult = null, okBtnText = null, okBtnColor = null, okBtnResult = null, additionalActionsRenderer = null}) {
+        return new Promise(resolve => {
+            const stateId = stateCnt
+            setStateCnt(prev => prev+1)
+
+            openPopup(s.new({
+                type:'showDialog',
+                args: arguments[0],
+                [s.stateId]: stateId,
+                [s.title]: title,
+                [s.contentRenderer]: () => {
+                    return contentRenderer(dialogResult => {
+                        closePopup({stateId})
+                        resolve(dialogResult)
+                    })
+                },
+                [s.text]: null,
+                [s.cancelBtnText]: cancelBtnText,
+                [s.onCancel]: () => {
+                    closePopup({stateId})
+                    resolve(cancelBtnResult)
+                },
+                [s.okBtnText]: okBtnText,
+                [s.okBtnColor]: okBtnColor,
+                [s.onOk]: () => {
+                    closePopup({stateId})
+                    resolve(okBtnResult)
+                },
+                [s.showProgress]: false,
                 [s.additionalActionsRenderer]: null,
-            })
-        ])
-        return () => closeDialog({stateId})
+            }))
+        })
+    }
+
+    function showMessageWithProgress({text, okBtnText = 'ok'}) {
+        const stateId = stateCnt
+        setStateCnt(prev => prev+1)
+
+        openPopup(s.new({
+            [s.stateId]: stateId,
+            [s.title]: null,
+            [s.contentRenderer]: null,
+            [s.text]: text,
+            [s.cancelBtnText]: null,
+            [s.onCancel]: null,
+            [s.okBtnText]: okBtnText,
+            [s.okBtnColor]: null,
+            [s.onOk]: () => null,
+            [s.showProgress]: true,
+            [s.additionalActionsRenderer]: null,
+        }))
+        return () => closePopup({stateId})
     }
 
     function showError({code, msg}) {
         return showMessage({text: `Error [${code}] - ${msg}`})
     }
 
-    const funcRef = useRef(null)
-    funcRef.current = {renderMessagePopup, confirmAction, showMessage, showError, showMessageWithProgress, showDialog}
-    function proxyThroughFuncRef(funcRef) {
-        const res = {}
-        for (const func in funcRef.current) {
-            res[func] = args => funcRef.current[func](args)
-        }
-        return res
+    return {
+        renderMessagePopup: useFuncRef(renderMessagePopup),
+        confirmAction: useFuncRef(confirmAction),
+        showMessage: useFuncRef(showMessage),
+        showError: useFuncRef(showError),
+        showMessageWithProgress: useFuncRef(showMessageWithProgress),
+        showDialog: useFuncRef(showDialog),
     }
-    return proxyThroughFuncRef(funcRef)
 }
