@@ -114,7 +114,7 @@ function useMessagePopup() {
 
             openPopup(s.new({
                 [s.stateId]: stateId,
-                [s.title]: null,
+                [s.title]: title,
                 [s.contentRenderer]: null,
                 [s.text]: text,
                 [s.cancelBtnText]: null,

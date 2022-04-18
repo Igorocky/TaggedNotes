@@ -132,6 +132,19 @@ const NoteFilterCmp = ({
         setFiltersSelected(prev => prev.filter(n => n !== name))
     }
 
+    function renderFilterHeader({filterName, onRemoved, title}) {
+        return RE.Container.row.left.center({},{},
+            iconButton({
+                iconName:'cancel',
+                onClick: () => {
+                    removeFilter(filterName)
+                    onRemoved()
+                }}
+            ),
+            RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, title)
+        )
+    }
+
     function createTagsToIncludeFilterObject() {
         const filterName = af.INCLUDE_TAGS
         const minimized = filterName !== focusedFilter
@@ -139,16 +152,7 @@ const NoteFilterCmp = ({
             [filterName]: {
                 displayName: 'Tags to include',
                 render: () => RE.Container.col.top.left({},{},
-                    RE.Container.row.left.center({},{},
-                        iconButton({
-                            iconName:'cancel',
-                            onClick: () => {
-                                removeFilter(filterName)
-                                setTagsToInclude([])
-                            }}
-                        ),
-                        RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, 'Include:')
-                    ),
+                    renderFilterHeader({filterName, onRemoved: () => setTagsToInclude([]), title: 'Include:'}),
                     re(TagSelector,{
                         allTags: remainingTags,
                         selectedTags: tagsToInclude,
@@ -180,16 +184,7 @@ const NoteFilterCmp = ({
             [filterName]: {
                 displayName: 'Tags to exclude',
                 render: () => RE.Container.col.top.left({},{},
-                    RE.Container.row.left.center({},{},
-                        iconButton({
-                            iconName:'cancel',
-                            onClick: () => {
-                                removeFilter(filterName)
-                                setTagsToExclude([])
-                            }
-                        }),
-                        RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, 'Exclude:')
-                    ),
+                    renderFilterHeader({filterName, onRemoved: () => setTagsToExclude([]), title: 'Exclude:'}),
                     re(TagSelector,{
                         allTags: remainingTags,
                         selectedTags: tagsToExclude,
@@ -221,16 +216,7 @@ const NoteFilterCmp = ({
             [filterName]: {
                 displayName: 'Created on or after',
                 render: () => RE.Container.col.top.left({},{},
-                    RE.Container.row.left.center({},{},
-                        iconButton({
-                            iconName:'cancel',
-                            onClick: () => {
-                                removeFilter(filterName)
-                                setCreatedOnOrAfter(new Date())
-                            }
-                        }),
-                        RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, 'Created on or after:')
-                    ),
+                    renderFilterHeader({filterName, onRemoved: () => setCreatedOnOrAfter(new Date()), title: 'Created on or after:'}),
                     re(DateSelector,{
                         selectedDate: createdOnOrAfter,
                         onDateSelected: newDate => setCreatedOnOrAfter(newDate),
@@ -250,16 +236,7 @@ const NoteFilterCmp = ({
             [filterName]: {
                 displayName: 'Created on or before',
                 render: () => RE.Container.col.top.left({},{},
-                    RE.Container.row.left.center({},{},
-                        iconButton({
-                            iconName:'cancel',
-                            onClick: () => {
-                                removeFilter(filterName)
-                                setCreatedOnOrBefore(new Date())
-                            }
-                        }),
-                        RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, 'Created on or before:')
-                    ),
+                    renderFilterHeader({filterName, onRemoved: () => setCreatedOnOrBefore(new Date()), title: 'Created on or before:'}),
                     re(DateSelector,{
                         selectedDate: createdOnOrBefore,
                         onDateSelected: newDate => setCreatedOnOrBefore(newDate),
@@ -277,18 +254,9 @@ const NoteFilterCmp = ({
         const minimized = filterName !== focusedFilter
         return {
             [filterName]: {
-                displayName: 'Native text contains',
+                displayName: 'Text contains',
                 render: () => RE.Container.col.top.left({},{},
-                    RE.Container.row.left.center({},{},
-                        iconButton({
-                            iconName:'cancel',
-                            onClick: () => {
-                                removeFilter(filterName)
-                                setTextContains('')
-                            }
-                        }),
-                        RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, 'Native text contains:')
-                    ),
+                    renderFilterHeader({filterName, onRemoved: () => setTextContains(''), title: 'Text contains:'}),
                     RE.If(minimized, () => RE.span({style:{padding:'5px', color:'blue'}}, `"${textContains}"`)),
                     RE.IfNot(minimized, () => textField({
                         value: textContains,
@@ -325,17 +293,14 @@ const NoteFilterCmp = ({
             [filterName]: {
                 displayName: 'Sort by',
                 render: () => RE.Container.col.top.left({},{},
-                    RE.Container.row.left.center({},{},
-                        iconButton({
-                            iconName:'cancel',
-                            onClick: () => {
-                                removeFilter(filterName)
-                                setSortBy(sb.TIME_CREATED)
-                                setSortDir(sd.ASC)
-                            }
-                        }),
-                        RE.span({style:{paddingRight:'10px'}, onClick: () => setFocusedFilter(null)}, 'Sort by:')
-                    ),
+                    renderFilterHeader({
+                        filterName,
+                        onRemoved: () => {
+                            setSortBy(sb.TIME_CREATED)
+                            setSortDir(sd.ASC)
+                        },
+                        title: 'Sort by:'
+                    }),
                     re(SortBySelector,{
                         possibleParams: possibleParams,
                         selectedParam: sortBy,
@@ -417,7 +382,11 @@ const NoteFilterCmp = ({
 
     function getEffectiveSelectedFilterNames() {
         return filtersSelected
-            .filter(filterName => (filterName !== af.INCLUDE_TAGS || tagsToInclude.length) && (filterName !== af.EXCLUDE_TAGS || tagsToExclude.length))
+            .filter(filterName =>
+                (filterName !== af.INCLUDE_TAGS || tagsToInclude.length)
+                && (filterName !== af.EXCLUDE_TAGS || tagsToExclude.length)
+                && (filterName !== af.TEXT_CONTAINS || textContains.trim().length)
+            )
     }
 
     function getSelectedFilter() {
@@ -453,7 +422,7 @@ const NoteFilterCmp = ({
         return RE.Paper({style:{padding:'5px'}},
             filtersToRender.length ? RE.Container.col.top.left({},{},
                 filtersToRender.map(filterName => allFilterObjects[filterName].renderMinimized())
-            ) : 'All cards'
+            ) : 'All notes'
         )
     } else {
         return RE.Fragment({},

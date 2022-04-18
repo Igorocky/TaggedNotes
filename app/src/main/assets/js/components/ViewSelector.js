@@ -42,7 +42,7 @@ const ViewSelector = ({}) => {
     }, [pageTitle])
 
     useEffect(() => {
-        openView(TAGS_VIEW)
+        openView(NOTES_SEARCH_VIEW)
     }, [])
 
     function updatePageTitle() {
