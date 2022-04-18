@@ -205,7 +205,7 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
         return RE.Container.row.left.center({},{},
             textField({
                 id: USER_INPUT_TEXT_FIELD,
-                autoFocus: true,
+                autoFocus: false,
                 value: newText,
                 label: 'New note',
                 variant: 'outlined',
