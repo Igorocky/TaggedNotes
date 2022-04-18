@@ -28,6 +28,9 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
 
     async function reloadNotes({filter}) {
         setFoundNotes(null)
+        if (isFilterEmpty(filter)) {
+            filter = {rowsLimit: pageSize, sortBy: 'TIME_CREATED', sortDir: 'DESC'}
+        }
         const res = await be.readNotesByFilter(filter)
         if (res.err) {
             setErrorLoadingNotes(res.err)
@@ -40,6 +43,14 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
             setFoundNotes(foundNotesResponse)
             setCurrPageIdx(0)
         }
+    }
+
+    function isFilterEmpty(filter) {
+        return (hasNoValue(filter.tagIdsToInclude) || filter.tagIdsToInclude.length === 0)
+               && (hasNoValue(filter.tagIdsToExclude) || filter.tagIdsToExclude.length === 0)
+               && (hasNoValue(filter.textContains) || filter.textContains.trim().length === 0)
+               && hasNoValue(filter.createdFrom)
+               && hasNoValue(filter.createdTill)
     }
 
     function renderListOfNotes() {
