@@ -50,7 +50,10 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
                 return 'There are no notes matching the search criteria.'
             } else {
                 return RE.Container.col.top.left({},{style:{marginTop: '10px'}},
-                    RE.If(foundNotes.length > pageSize, () => renderPaginationControls({})),
+                    RE.Container.row.left.center({},{},
+                        `Found ${foundNotes.length}`,
+                        RE.If(foundNotes.length > pageSize, () => renderPaginationControls({})),
+                    ),
                     re(ListOfObjectsCmp,{
                         objects: foundNotes,
                         beginIdx: pageFirstItemIdx,
@@ -140,7 +143,7 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
             allTagsMap,
             filter,
             onSubmit: doSearch,
-            onEdit: () => setIsEditFilterMode(true),
+            onEdit: openFilter,
             onClear: () => doSearch({}),
             minimized: !isEditFilterMode,
             noteUpdateCounter: noteUpdateCounter
@@ -190,12 +193,6 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
     }
 
     return RE.Fragment({},
-        RE.If(controlsContainer?.current, () => RE.Portal({container:controlsContainer.current},
-            RE.If(!isEditFilterMode && hasValue(foundNotes), () => RE.span({style:{marginLeft:'15px'}}, foundNotes.length)),
-            RE.IfNot(isEditFilterMode, () => RE.Fragment({},
-                iconButton({iconName:'filter_alt', onClick: openFilter})
-            )),
-        )),
         renderPageContent(),
         renderMessagePopup()
     )
