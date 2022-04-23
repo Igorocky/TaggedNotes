@@ -5,13 +5,10 @@ const EditNoteCmp = ({allTags, allTagsMap, note, onCancelled, onSaved, onDeleted
 
     const [text, setText] = useState(note.text)
     const [tagIds, setTagIds] = useState(note.tagIds)
+    const initialTagIds = note.tagIds
     const createdAt = useMemo(() => new Date(note.createdAt), [note.id])
 
     const {renderHistory} = useNoteHistory({noteId:note.id})
-
-    useEffect(() => {
-        window.scrollTo(0, 0)
-    }, [])
 
     function isModified({initialValue, currValue}) {
         if (Array.isArray(initialValue)) {
@@ -22,8 +19,8 @@ const EditNoteCmp = ({allTags, allTagsMap, note, onCancelled, onSaved, onDeleted
     }
 
     const textIsModified = isModified({initialValue: note.text, currValue:text})
-    const tagIdsIsModified = isModified({initialValue: note.tagIds, currValue:tagIds})
-    const dataIsModified = textIsModified || tagIdsIsModified
+    const tagsIsModified = isModified({initialValue:initialTagIds, currValue:tagIds})
+    const dataIsModified = textIsModified || tagsIsModified
 
     async function doCancel() {
         if (!dataIsModified || dataIsModified && await confirmAction({text: 'Your changes will be lost.'})) {
@@ -35,7 +32,7 @@ const EditNoteCmp = ({allTags, allTagsMap, note, onCancelled, onSaved, onDeleted
         const closeProgressIndicator = showMessageWithProgress({text: 'Saving changes...'})
         const res = await be.updateNote({
             noteId: note.id,
-            tagIds: tagIdsIsModified?tagIds:null,
+            tagIds: tagsIsModified?tagIds:null,
             text: textIsModified?text:null,
         })
         closeProgressIndicator()
@@ -47,7 +44,7 @@ const EditNoteCmp = ({allTags, allTagsMap, note, onCancelled, onSaved, onDeleted
     }
 
     async function doDelete() {
-        if (await confirmAction({text: 'Delete this card?', okBtnColor: 'secondary'})) {
+        if (await confirmAction({text: 'Delete this note?', okBtnColor: 'secondary'})) {
             const closeProgressIndicator = showMessageWithProgress({text: 'Deleting...'})
             const res = await be.deleteNote({noteId:note.id})
             closeProgressIndicator()
@@ -69,13 +66,13 @@ const EditNoteCmp = ({allTags, allTagsMap, note, onCancelled, onSaved, onDeleted
         re(EditNoteForm,{
             allTags, allTagsMap,
 
-            text: text,
+            text,
             textOnChange: newValue => setText(newValue),
             textBgColor: getBgColor(textIsModified),
 
-            tagIds: tagIds,
+            tagIds,
             tagIdsOnChange: newValue => setTagIds(newValue),
-            tagIdsBgColor: getBgColor(tagIdsIsModified),
+            tagIdsBgColor: getBgColor(tagsIsModified),
 
             createdAt,
 

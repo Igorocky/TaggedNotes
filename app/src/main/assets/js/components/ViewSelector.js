@@ -24,8 +24,8 @@ function addView({name, component, params}) {
 addView({name: BACKUPS_VIEW, component: BackupsView})
 addView({name: HTTP_SERVER_VIEW, component: HttpServerView})
 
-addView({name: NOTES_ADD_VIEW, component: NotesSearchView, params:{key:NOTES_ADD_VIEW,mode:NOTES_SEARCH_VIEW_MODE_ADD}})
-addView({name: NOTES_SEARCH_VIEW, component: NotesSearchView, params:{key:NOTES_SEARCH_VIEW}})
+addView({name: NOTES_ADD_VIEW, component: NotesAddView})
+addView({name: NOTES_SEARCH_VIEW, component: NotesSearchView})
 addView({name: TAGS_VIEW, component: TagsView})
 
 const ViewSelector = ({}) => {

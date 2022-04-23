@@ -4,6 +4,7 @@ const MessagePopupState = {
     stateId: 'stateId',
     title: 'title',
     text: 'text',
+    fullScreen: 'fullScreen',
     contentRenderer: 'contentRenderer',
     cancelBtnText: 'cancelBtnText',
     onCancel: 'onCancel',
@@ -56,7 +57,7 @@ function useMessagePopup() {
     }
 
     function renderMessagePopupForState({st}) {
-        return RE.Dialog({open:true, key: st[s.stateId]},
+        return RE.Dialog({open:true, fullScreen:st[s.fullScreen], key: st[s.stateId]},
             RE.If(hasValue(st[s.title]), () => RE.DialogTitle({}, st[s.title])),
             RE.If(hasValue(st[s.contentRenderer]), () => RE.DialogContent({}, st[s.contentRenderer]())),
             RE.If(hasValue(st[s.text]), () => RE.DialogContent({}, RE.Typography({}, st[s.text]))),
@@ -90,6 +91,7 @@ function useMessagePopup() {
                 [s.title]: null,
                 [s.contentRenderer]: null,
                 [s.text]: text,
+                [s.fullScreen]: false,
                 [s.cancelBtnText]: cancelBtnText,
                 [s.onCancel]: () => {
                     closePopup({stateId})
@@ -117,6 +119,7 @@ function useMessagePopup() {
                 [s.title]: title,
                 [s.contentRenderer]: null,
                 [s.text]: text,
+                [s.fullScreen]: false,
                 [s.cancelBtnText]: null,
                 [s.onCancel]: null,
                 [s.okBtnText]: okBtnText,
@@ -131,7 +134,7 @@ function useMessagePopup() {
         })
     }
 
-    async function showDialog({title, contentRenderer, cancelBtnText, cancelBtnResult = null, okBtnText = null, okBtnColor = null, okBtnResult = null, additionalActionsRenderer = null}) {
+    async function showDialog({title, fullScreen = false, contentRenderer, cancelBtnText, cancelBtnResult = null, okBtnText = null, okBtnColor = null, okBtnResult = null, additionalActionsRenderer = null}) {
         return new Promise(resolve => {
             const stateId = stateCnt
             setStateCnt(prev => prev+1)
@@ -148,6 +151,7 @@ function useMessagePopup() {
                     })
                 },
                 [s.text]: null,
+                [s.fullScreen]: fullScreen,
                 [s.cancelBtnText]: cancelBtnText,
                 [s.onCancel]: () => {
                     closePopup({stateId})
@@ -174,6 +178,7 @@ function useMessagePopup() {
             [s.title]: null,
             [s.contentRenderer]: null,
             [s.text]: text,
+            [s.fullScreen]: false,
             [s.cancelBtnText]: null,
             [s.onCancel]: null,
             [s.okBtnText]: okBtnText,
