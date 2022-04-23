@@ -19,9 +19,13 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
     })
     const [selectedTagIds, setSelectedTagIds] = useState([])
 
+    const [allTagsLoaded, setAllTagsLoaded] = useState(false)
     useEffect(() => {
-        openExpandedFilter()
-    }, [])
+        if (hasValue(allTagsMap)) {
+            setAllTagsLoaded(true)
+            openExpandedFilter()
+        }
+    }, [allTagsMap])
 
     const renderFilterRef = useFuncRef(renderFilter)
     const reloadNotesRef = useFuncRef(reloadNotes)
