@@ -4,7 +4,7 @@ const USER_INPUT_TEXT_FIELD = 'user-input'
 const NOTES_SEARCH_VIEW_MODE_ADD = 'NOTES_SEARCH_VIEW_MODE_ADD'
 const NOTES_SEARCH_VIEW_MODE_SEARCH = 'NOTES_SEARCH_VIEW_MODE_SEARCH'
 
-const NotesSearchView = ({query,openView,setPageTitle,controlsContainer,mode = NOTES_SEARCH_VIEW_MODE_SEARCH}) => {
+const NotesAddView = ({query,openView,setPageTitle,controlsContainer,mode = NOTES_SEARCH_VIEW_MODE_SEARCH}) => {
     const {renderMessagePopup, showMessage, confirmAction, showError, showMessageWithProgress} = useMessagePopup()
 
     const [filter, setFilter] = useState({})

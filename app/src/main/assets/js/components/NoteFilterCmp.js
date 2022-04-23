@@ -414,10 +414,11 @@ const NoteFilterCmp = ({
             )
     }
 
+    const effectiveSelectedFilterNames = getEffectiveSelectedFilterNames()
     function getSelectedFilter() {
         return {
             ...(
-                getEffectiveSelectedFilterNames()
+                effectiveSelectedFilterNames
                     .map(filterName => allFilterObjects[filterName])
                     .reduce((acc, elem) => ({...acc, ...elem.getFilterValues()}), {})
             ),
@@ -437,10 +438,16 @@ const NoteFilterCmp = ({
         } else if (hasNoValue(allTags) || hasNoValue(allTagsMap) || hasNoValue(objToTagsMap)) {
             return 'Loading tags...'
         } else {
+            const searchIsDisabled = effectiveSelectedFilterNames.length === 0
             return RE.Container.col.top.left({style:{marginTop:'5px'}},{style:{marginTop:'5px'}},
                 RE.Container.row.left.center({},{},
                     renderAddFilterButton(),
-                    iconButton({iconName:submitButtonIconName, onClick: doSubmit})
+                    iconButton({
+                        iconName:submitButtonIconName,
+                        onClick: doSubmit,
+                        disabled: searchIsDisabled,
+                        iconStyle: {color:searchIsDisabled?'lightgrey':'black'},
+                    })
                 ),
                 renderSelectedFilters(),
             )
@@ -449,11 +456,11 @@ const NoteFilterCmp = ({
 
     if (minimized) {
         const filtersToRender = getEffectiveSelectedFilterNames().sortBy(n => NOTE_FILTER_SORT_ORDER[n])
-        return RE.Paper({style:{padding:'5px'}},
+        return RE.Paper({style:{padding:'5px', backgroundColor:'rgb(245,245,245)'}},
             RE.Container.col.top.left({},{},
                 RE.Container.row.left.center({},{style:{marginRight:'20px'}},
-                    iconButton({iconName:'clear', onClick: clearFilters}),
-                    iconButton({iconName:'edit', onClick: onEdit}),
+                    iconButton({iconName:'youtube_searched_for', onClick: onEdit}),
+                    RE.If(hasValue(onClear), () => iconButton({iconName:'clear', onClick: clearFilters})),
                 ),
                 filtersToRender.length
                     ? filtersToRender.map(filterName => allFilterObjects[filterName].renderMinimized())

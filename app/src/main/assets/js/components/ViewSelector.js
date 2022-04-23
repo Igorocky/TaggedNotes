@@ -8,8 +8,9 @@ function createQueryObjectForView(viewName, params) {
 const BACKUPS_VIEW = 'BACKUPS_VIEW'
 const HTTP_SERVER_VIEW = 'HTTP_SERVER_VIEW'
 
-const TAGS_VIEW = 'TAGS_VIEW'
+const NOTES_ADD_VIEW = 'NOTES_ADD_VIEW'
 const NOTES_SEARCH_VIEW = 'NOTES_SEARCH_VIEW'
+const TAGS_VIEW = 'TAGS_VIEW'
 
 const VIEWS = {}
 function addView({name, component, params}) {
@@ -23,8 +24,9 @@ function addView({name, component, params}) {
 addView({name: BACKUPS_VIEW, component: BackupsView})
 addView({name: HTTP_SERVER_VIEW, component: HttpServerView})
 
+addView({name: NOTES_ADD_VIEW, component: NotesSearchView, params:{key:NOTES_ADD_VIEW,mode:NOTES_SEARCH_VIEW_MODE_ADD}})
+addView({name: NOTES_SEARCH_VIEW, component: NotesSearchView, params:{key:NOTES_SEARCH_VIEW}})
 addView({name: TAGS_VIEW, component: TagsView})
-addView({name: NOTES_SEARCH_VIEW, component: NotesSearchView})
 
 const ViewSelector = ({}) => {
     const [currentViewUrl, setCurrentViewUrl] = useState(null)
@@ -40,7 +42,7 @@ const ViewSelector = ({}) => {
     }, [pageTitle])
 
     useEffect(() => {
-        openView(NOTES_SEARCH_VIEW)
+        openView(NOTES_ADD_VIEW)
     }, [])
 
     function updatePageTitle() {
@@ -74,6 +76,7 @@ const ViewSelector = ({}) => {
             [].filter(e=>hasValue(e))
         ]
         const buttons = [[
+            {key:NOTES_ADD_VIEW, viewName:NOTES_ADD_VIEW, iconName:'add'},
             {key:NOTES_SEARCH_VIEW, viewName:NOTES_SEARCH_VIEW, iconName:'search'},
             {key:TAGS_VIEW, viewName:TAGS_VIEW, iconName:'sell'},
             {key:BACKUPS_VIEW, viewName:BACKUPS_VIEW, iconName:'archive'},

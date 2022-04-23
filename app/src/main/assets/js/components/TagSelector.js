@@ -4,6 +4,7 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
 
     const [filterText, setFilterText] = useState('')
     let selectedTagIds = selectedTags.map(t=>t.id)
+    const filterTextFieldRef = useRef(null)
 
     function renderSelectedTags() {
         return RE.Fragment({},
@@ -34,6 +35,7 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
         if (allTags?.length) {
             return textField(
                 {
+                    ref: filterTextFieldRef,
                     variant: 'outlined',
                     style: {width: 200},
                     size: 'small',
@@ -53,6 +55,9 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
 
     function selectTag(tag) {
         setFilterText('')
+        if (filterTextFieldRef.current) {
+            filterTextFieldRef.current.getElementsByTagName('input')[0].focus()
+        }
         onTagSelected(tag)
     }
 
