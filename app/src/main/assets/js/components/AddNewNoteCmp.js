@@ -1,6 +1,9 @@
 "use strict";
 
-const AddNewNoteCmp = ({allTags, allTagsMap, selectedTagIds, onNoteCreated, showError, showMessageWithProgress}) => {
+const AddNewNoteCmp = ({
+                           allTags, autoFocus = true, selectedTagIds, onNoteCreated,
+                           showError, showMessageWithProgress
+}) => {
 
     const [newText, setNewText] = useState('')
     const [selectedTags, setSelectedTags] = useState([])
@@ -30,7 +33,7 @@ const AddNewNoteCmp = ({allTags, allTagsMap, selectedTagIds, onNoteCreated, show
         return RE.Container.row.left.center({},{},
             textField({
                 id: USER_INPUT_TEXT_FIELD,
-                autoFocus: true,
+                autoFocus,
                 value: newText,
                 label: 'New note',
                 variant: 'outlined',

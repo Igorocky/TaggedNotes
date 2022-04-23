@@ -56,7 +56,7 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
         } else {
             return RE.Container.col.top.left({style: {marginTop: '5px'}}, {style: {marginBottom: '10px'}},
                 re(AddNewNoteCmp,{
-                    allTags, allTagsMap,
+                    allTags, autoFocus: false,
                     selectedTagIds,
                     onNoteCreated: newNoteId => {
                         noteWasCreated({noteId:newNoteId})
