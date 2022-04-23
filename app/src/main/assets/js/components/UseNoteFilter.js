@@ -425,7 +425,7 @@ const UseNoteFilter = ({
         }
     }
 
-    function renderFilter({minimized, onSubmit}) {
+    function renderFilter({minimized, onSubmit, onClose}) {
         if (errorLoadingObjToTagsMap) {
             return RE.Fragment({},
                 `An error occurred during loading of object to tags mapping: [${errorLoadingObjToTagsMap.code}] - ${errorLoadingObjToTagsMap.msg}`,
@@ -449,6 +449,7 @@ const UseNoteFilter = ({
             const searchIsDisabled = effectiveSelectedFilterNames.length === 0
             return RE.Container.col.top.left({style:{marginTop:'5px'}},{style:{marginTop:'5px'}},
                 RE.Container.row.left.center({},{},
+                    iconButton({iconName:'close', onClick: onClose,}),
                     renderAddFilterButton(),
                     iconButton({
                         iconName:submitButtonIconName,

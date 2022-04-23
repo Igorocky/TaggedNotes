@@ -31,7 +31,6 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
     const reloadNotesRef = useFuncRef(reloadNotes)
     async function openExpandedFilter() {
         await showDialog({
-            title: 'Search criteria:',
             fullScreen: true,
             contentRenderer: resolve => {
                 return renderFilterRef({
@@ -40,10 +39,10 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
                         resolve()
                         setSelectedTagIds(filter.tagIdsToInclude??[])
                         reloadNotesRef({filter})
-                    }
+                    },
+                    onClose: () => openView(NOTES_ADD_VIEW)
                 })
             },
-            onClose: () => openView(NOTES_ADD_VIEW)
         })
     }
 

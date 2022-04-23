@@ -51,7 +51,7 @@ const UseListOfNotes = ({
                     beginIdx: usePagination?pageFirstItemIdx:0,
                     endIdx: usePagination?pageLastItemIdx:foundNotes.length,
                     onObjectClicked: noteId => setFocusedNoteId(prev => prev !== noteId ? noteId : null),
-                    renderObject: (note,idx) => RE.Paper({},
+                    renderObject: (note,idx) => RE.Paper({style:{backgroundColor:'rgb(255, 249, 230)'}},
                         re(NoteShortViewCmp,{
                             note,
                             idx,
@@ -119,7 +119,6 @@ const UseListOfNotes = ({
 
     async function openEditNoteDialog({note}) {
         await showDialog({
-            title: 'Edit note:',
             fullScreen: true,
             contentRenderer: resolve => {
                 return re(EditNoteCmp, {
