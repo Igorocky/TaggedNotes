@@ -21,7 +21,7 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
 
     const [allTagsLoaded, setAllTagsLoaded] = useState(false)
     useEffect(() => {
-        if (hasValue(allTagsMap)) {
+        if (hasValue(allTagsMap) && !allTagsLoaded) {
             setAllTagsLoaded(true)
             openExpandedFilter()
         }

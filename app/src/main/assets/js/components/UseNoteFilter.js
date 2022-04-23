@@ -48,11 +48,11 @@ const UseNoteFilter = ({
     const [focusedFilter, setFocusedFilter] = useState(filtersSelected[0])
 
     const [tagIdsToInclude, setTagIdsToInclude] = useState([])
-    const tagsToInclude = tagIdsToInclude?.map(id => allTagsMap[id])
+    const tagsToInclude = tagIdsToInclude?.map(id => (allTagsMap?.[id])??[])
     const [tagIdsToExclude, setTagIdsToExclude] = useState([])
-    const tagsToExclude = tagIdsToExclude?.map(id => allTagsMap[id])
+    const tagsToExclude = tagIdsToExclude?.map(id => (allTagsMap?.[id])??[])
     const [remainingTagIds, setRemainingTagIds] = useState([])
-    const remainingTags = remainingTagIds?.map(id => allTagsMap[id])
+    const remainingTags = remainingTagIds?.map(id => (allTagsMap?.[id])??[])
 
     const [createdOnOrAfter, setCreatedOnOrAfter] = useState(new Date())
     const [createdOnOrBefore, setCreatedOnOrBefore] = useState(new Date())
@@ -430,6 +430,8 @@ const UseNoteFilter = ({
             return RE.Fragment({},
                 `An error occurred during loading of object to tags mapping: [${errorLoadingObjToTagsMap.code}] - ${errorLoadingObjToTagsMap.msg}`,
             )
+        } else if (hasNoValue(allTagsMap)) {
+            return RE.Fragment({}, `Loading tags...`,)
         } else if (minimized) {
             const filtersToRender = getEffectiveSelectedFilterNames().sortBy(n => NOTE_FILTER_SORT_ORDER[n])
             return RE.Paper({style:{padding:'5px', backgroundColor:'rgb(245,245,245)'}},
