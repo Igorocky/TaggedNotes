@@ -453,7 +453,7 @@ const UseNoteFilter = ({
                         onClick: () => onSubmit(getSelectedFilter()),
                         disabled: searchIsDisabled,
                         iconStyle: {color:searchIsDisabled?'lightgrey':'black'},
-                    })
+                    }),
                 ),
                 renderSelectedFilters(),
             )

@@ -42,7 +42,8 @@ const NotesSearchView = ({query,openView,setPageTitle,controlsContainer}) => {
                         reloadNotesRef({filter})
                     }
                 })
-            }
+            },
+            onClose: () => openView(NOTES_ADD_VIEW)
         })
     }
 

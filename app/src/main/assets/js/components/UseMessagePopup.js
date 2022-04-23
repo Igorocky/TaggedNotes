@@ -11,6 +11,7 @@ const MessagePopupState = {
     okBtnText: 'okBtnText',
     okBtnColor: 'okBtnColor',
     onOk: 'onOk',
+    onClose: 'onClose',
     showProgress: 'showProgress',
     additionalActionsRenderer: 'additionalActionsRenderer',
 
@@ -58,7 +59,10 @@ function useMessagePopup() {
 
     function renderMessagePopupForState({st}) {
         return RE.Dialog({open:true, fullScreen:st[s.fullScreen], key: st[s.stateId]},
-            RE.If(hasValue(st[s.title]), () => RE.DialogTitle({}, st[s.title])),
+            RE.If(hasValue(st[s.title]), () => RE.DialogTitle({},
+                RE.If(hasValue(st[s.onClose]), () => iconButton({iconName:'close', onClick: st[s.onClose],})),
+                st[s.title]
+            )),
             RE.If(hasValue(st[s.contentRenderer]), () => RE.DialogContent({}, st[s.contentRenderer]())),
             RE.If(hasValue(st[s.text]), () => RE.DialogContent({}, RE.Typography({}, st[s.text]))),
             RE.DialogActions({}, renderActionButtons({st}))
@@ -103,6 +107,7 @@ function useMessagePopup() {
                     closePopup({stateId})
                     resolve(true)
                 },
+                [s.onClose]: null,
                 [s.showProgress]: false,
                 [s.additionalActionsRenderer]: null,
             }))
@@ -128,13 +133,14 @@ function useMessagePopup() {
                     closePopup({stateId})
                     resolve(true)
                 },
+                [s.onClose]: null,
                 [s.showProgress]: false,
                 [s.additionalActionsRenderer]: additionalActionsRenderer,
             }))
         })
     }
 
-    async function showDialog({title, fullScreen = false, contentRenderer, cancelBtnText, cancelBtnResult = null, okBtnText = null, okBtnColor = null, okBtnResult = null, additionalActionsRenderer = null}) {
+    async function showDialog({title, fullScreen = false, contentRenderer, cancelBtnText, cancelBtnResult = null, okBtnText = null, okBtnColor = null, okBtnResult = null, additionalActionsRenderer = null, onClose}) {
         return new Promise(resolve => {
             const stateId = stateCnt
             setStateCnt(prev => prev+1)
@@ -163,6 +169,7 @@ function useMessagePopup() {
                     closePopup({stateId})
                     resolve(okBtnResult)
                 },
+                [s.onClose]: onClose,
                 [s.showProgress]: false,
                 [s.additionalActionsRenderer]: null,
             }))
@@ -184,6 +191,7 @@ function useMessagePopup() {
             [s.okBtnText]: okBtnText,
             [s.okBtnColor]: null,
             [s.onOk]: () => null,
+            [s.onClose]: null,
             [s.showProgress]: true,
             [s.additionalActionsRenderer]: null,
         }))
