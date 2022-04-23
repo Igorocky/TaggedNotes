@@ -42,7 +42,7 @@ const ViewSelector = ({}) => {
     }, [pageTitle])
 
     useEffect(() => {
-        openView(NOTES_SEARCH_VIEW)
+        openView(NOTES_ADD_VIEW)
     }, [])
 
     function updatePageTitle() {

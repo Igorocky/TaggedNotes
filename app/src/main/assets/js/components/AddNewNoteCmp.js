@@ -30,7 +30,7 @@ const AddNewNoteCmp = ({allTags, allTagsMap, selectedTagIds, onNoteCreated, show
         return RE.Container.row.left.center({},{},
             textField({
                 id: USER_INPUT_TEXT_FIELD,
-                autoFocus: false,
+                autoFocus: true,
                 value: newText,
                 label: 'New note',
                 variant: 'outlined',
