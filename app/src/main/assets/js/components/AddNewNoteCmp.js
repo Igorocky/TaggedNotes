@@ -1,6 +1,6 @@
 "use strict";
 
-const AddNewNoteCmp = ({allTags, allTagsMap, onNoteCreated, renderMessagePopup, showError, showMessageWithProgress}) => {
+const AddNewNoteCmp = ({allTags, allTagsMap, selectedTagIds, onNoteCreated, showError, showMessageWithProgress}) => {
 
     const [newText, setNewText] = useState('')
     const [selectedTags, setSelectedTags] = useState([])
@@ -12,7 +12,7 @@ const AddNewNoteCmp = ({allTags, allTagsMap, onNoteCreated, renderMessagePopup, 
     async function createNewNote() {
         if (createNewNoteIsAllowed()) {
             const closeProgressIndicatorSave = showMessageWithProgress({text: 'Saving new note...'})
-            const resSave = await be.createNote({text: newText, tagIds: selectedTags.map(t=>t.id)})
+            const resSave = await be.createNote({text: newText, tagIds: selectedTagIds??selectedTags.map(t=>t.id)})
             closeProgressIndicatorSave()
             if (resSave.err) {
                 await showError(resSave.err)
@@ -71,7 +71,6 @@ const AddNewNoteCmp = ({allTags, allTagsMap, onNoteCreated, renderMessagePopup, 
 
     return RE.Fragment({},
         renderAddNoteControls(),
-        renderTagSelector(),
-        renderMessagePopup(),
+        RE.If(hasNoValue(selectedTagIds), () => renderTagSelector()),
     )
 }

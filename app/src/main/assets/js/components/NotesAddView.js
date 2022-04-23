@@ -28,7 +28,7 @@ const NotesAddView = ({query,openView,setPageTitle,controlsContainer}) => {
                 re(AddNewNoteCmp,{
                     allTags, allTagsMap,
                     onNoteCreated: newNoteId => noteWasCreated({noteId:newNoteId}),
-                    renderMessagePopup, showError, showMessageWithProgress
+                    showError, showMessageWithProgress
                 }),
                 renderListOfNotes(),
             )

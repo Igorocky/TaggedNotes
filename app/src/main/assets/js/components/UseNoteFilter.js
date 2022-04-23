@@ -31,13 +31,12 @@ const AVAILABLE_SORT_DIR = {
     DESC:'DESC',
 }
 
-const NoteFilterCmp = ({
-                                    allTags, allTagsMap, filter, onSubmit, onEdit, onClear, minimized,
+const UseNoteFilter = ({
+                                    allTagsMap, onSubmit, onEdit, onClear,
                                     submitButtonIconName = 'search',
                                     allowedFilters, defaultFilters = [AVAILABLE_NOTE_FILTERS.INCLUDE_TAGS, AVAILABLE_NOTE_FILTERS.EXCLUDE_TAGS],
-                                    objUpdateCounter
+                                    showError, showDialog
                                 }) => {
-    const {renderMessagePopup, showError, showDialog} = useMessagePopup()
     const af = AVAILABLE_NOTE_FILTERS
     const sb = AVAILABLE_NOTE_SORT_BY
     const sd = AVAILABLE_SORT_DIR
@@ -63,19 +62,9 @@ const NoteFilterCmp = ({
     const [sortBy, setSortBy] = useState(sb.TIME_CREATED)
     const [sortDir, setSortDir] = useState(sd.DESC)
 
-    useEffect(() => {
-        initFromFilterObject(filter)
-    }, [])
-
     useEffect(async () => {
-        const res = await be.getObjToTagMapping()
-        if (res.err) {
-            setErrorLoadingObjToTagsMap(res.err)
-            showError(res.err)
-        } else {
-            setObjToTagsMap(res.data)
-        }
-    }, [objUpdateCounter])
+        reloadObjToTagsMap()
+    }, [])
 
     useEffect(async () => {
         if (objToTagsMap) {
@@ -93,6 +82,16 @@ const NoteFilterCmp = ({
         setTextContains(filter?.textContains??'')
         setSortBy(filter?.sortBy??sb.TIME_CREATED)
         setSortDir(filter?.sortDir??sd.DESC)
+    }
+
+    async function reloadObjToTagsMap() {
+        const res = await be.getObjToTagMapping()
+        if (res.err) {
+            setErrorLoadingObjToTagsMap(res.err)
+            showError(res.err)
+        } else {
+            setObjToTagsMap(res.data)
+        }
     }
 
     function recalculateRemainingTags() {
@@ -426,17 +425,24 @@ const NoteFilterCmp = ({
         }
     }
 
-    function doSubmit() {
-        onSubmit(getSelectedFilter())
-    }
-
-    function renderComponentContent() {
+    function renderFilter({minimized, onSubmit}) {
         if (errorLoadingObjToTagsMap) {
             return RE.Fragment({},
                 `An error occurred during loading of object to tags mapping: [${errorLoadingObjToTagsMap.code}] - ${errorLoadingObjToTagsMap.msg}`,
             )
-        } else if (hasNoValue(allTags) || hasNoValue(allTagsMap) || hasNoValue(objToTagsMap)) {
-            return 'Loading tags...'
+        } else if (minimized) {
+            const filtersToRender = getEffectiveSelectedFilterNames().sortBy(n => NOTE_FILTER_SORT_ORDER[n])
+            return RE.Paper({style:{padding:'5px', backgroundColor:'rgb(245,245,245)'}},
+                RE.Container.col.top.left({},{},
+                    RE.Container.row.left.center({},{style:{marginRight:'20px'}},
+                        iconButton({iconName:'youtube_searched_for', onClick: onEdit}),
+                        RE.If(hasValue(onClear), () => iconButton({iconName:'clear', onClick: clearFilters})),
+                    ),
+                    filtersToRender.length
+                        ? filtersToRender.map(filterName => allFilterObjects[filterName].renderMinimized())
+                        : 'All notes'
+                )
+            )
         } else {
             const searchIsDisabled = effectiveSelectedFilterNames.length === 0
             return RE.Container.col.top.left({style:{marginTop:'5px'}},{style:{marginTop:'5px'}},
@@ -444,7 +450,7 @@ const NoteFilterCmp = ({
                     renderAddFilterButton(),
                     iconButton({
                         iconName:submitButtonIconName,
-                        onClick: doSubmit,
+                        onClick: () => onSubmit(getSelectedFilter()),
                         disabled: searchIsDisabled,
                         iconStyle: {color:searchIsDisabled?'lightgrey':'black'},
                     })
@@ -454,23 +460,5 @@ const NoteFilterCmp = ({
         }
     }
 
-    if (minimized) {
-        const filtersToRender = getEffectiveSelectedFilterNames().sortBy(n => NOTE_FILTER_SORT_ORDER[n])
-        return RE.Paper({style:{padding:'5px', backgroundColor:'rgb(245,245,245)'}},
-            RE.Container.col.top.left({},{},
-                RE.Container.row.left.center({},{style:{marginRight:'20px'}},
-                    iconButton({iconName:'youtube_searched_for', onClick: onEdit}),
-                    RE.If(hasValue(onClear), () => iconButton({iconName:'clear', onClick: clearFilters})),
-                ),
-                filtersToRender.length
-                    ? filtersToRender.map(filterName => allFilterObjects[filterName].renderMinimized())
-                    : 'All notes'
-            )
-        )
-    } else {
-        return RE.Fragment({},
-            renderComponentContent(),
-            renderMessagePopup()
-        )
-    }
+    return {renderFilter, reloadObjToTagsMap}
 }

@@ -2,7 +2,7 @@
 
 const UseListOfNotes = ({
                             titleFn, pageSize,
-                            onNoteCreated, onNoteUpdated, onNoteDeleted,
+                            onNoteUpdated, onNoteDeleted,
                             allTags, allTagsMap,
                             showDialog, confirmAction, showError, showMessageWithProgress
                         }) => {
@@ -24,13 +24,18 @@ const UseListOfNotes = ({
             const foundNotesResponse = res.data.notes
             for (const note of foundNotesResponse) {
                 note.tagIds = note.tagIds.map(id => allTagsMap[id]).sortBy('name').map(tag=>tag.id)
+                note.tags = note.tagIds.map(id => allTagsMap[id])
             }
             setFoundNotes(foundNotesResponse)
         }
     }
 
     function renderListOfNotes() {
-        if (hasNoValue(foundNotes)) {
+        if (errorLoadingNotes) {
+            return RE.Fragment({},
+                `An error occurred during loading of notes: [${errorLoadingNotes.code}] - ${errorLoadingNotes.msg}`,
+            )
+        } else if (hasNoValue(foundNotes)) {
             return 'Loading notes...'
         } else if (foundNotes.length == 0) {
             return 'There are no notes.'
@@ -68,7 +73,10 @@ const UseListOfNotes = ({
         if (res.err) {
             await showError(res.err)
         } else {
-            return res.data
+            const note = res.data
+            note.tagIds = note.tagIds.map(id => allTagsMap[id]).sortBy('name').map(tag=>tag.id)
+            note.tags = note.tagIds.map(id => allTagsMap[id])
+            return note
         }
     }
 

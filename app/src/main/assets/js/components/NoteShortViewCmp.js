@@ -1,6 +1,6 @@
 "use strict";
 
-const NoteShortViewCmp = ({note, idx, isFocused, onDelete, onEdit, allTagsMap}) => {
+const NoteShortViewCmp = ({note, idx, isFocused, onDelete, onEdit}) => {
 
     function renderNoteText(text) {
         if (text.indexOf('\n') >= 0) {
@@ -14,7 +14,7 @@ const NoteShortViewCmp = ({note, idx, isFocused, onDelete, onEdit, allTagsMap}) 
         const noteElem = RE.Fragment({},
             RE.div({style:{borderBottom:'solid 1px lightgrey', padding:'3px'}},
                 RE.span({style:{fontWeight:'bold'}},`${idx+1}. `),
-                renderListOfTags({tags: note.tagIds.map(id=>allTagsMap[id])})
+                renderListOfTags({tags: note.tags})
             ),
             RE.div({style:{borderBottom:'solid 1px lightgrey', padding:'3px'}},
                 RE.span({style:{}},renderNoteText(note.text))
