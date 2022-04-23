@@ -16,6 +16,7 @@ const UseListOfNotes = ({
 
     async function reloadNotes({filter}) {
         setFoundNotes(null)
+        setFocusedNoteId(null)
         const res = await be.readNotesByFilter(filter)
         if (res.err) {
             setErrorLoadingNotes(res.err)
