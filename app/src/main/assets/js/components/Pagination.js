@@ -8,6 +8,7 @@ function Pagination({numOfPages,curIdx,onChange,pageNumShift=1,onlyArrowButtons=
                 variant: 'outlined', label: 'Page',
                 style: {width: 80},
                 size: 'small',
+                inputProps: {autoCorrect: 'off', autoCapitalize: 'off', spellCheck: 'false', autoComplete: 'off'},
                 onKeyDown: ({nativeEvent:event}) => {
                     if (event.keyCode == 13) {
                         const newPageNumStr = event.target.value?.trim()

@@ -250,13 +250,6 @@ function iconButton({iconName,onClick,disabled,iconStyle,tabIndex}) {
 function textField(attrs) {
     return RE.TextField({
         ...attrs,
-        inputProps: {
-            autoCorrect: 'off',
-            autoCapitalize: 'off',
-            spellCheck: 'false',
-            autoComplete: 'off',
-            ...(attrs.inputProps??{})
-        },
     })
 }
 

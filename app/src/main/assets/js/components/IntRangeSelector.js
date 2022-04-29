@@ -33,7 +33,7 @@ const IntRangeSelector = ({selectedMin = null, selectedMax = null, onMinSelected
                 multiline: false,
                 maxRows: 1,
                 size: 'small',
-                inputProps: {size:4},
+                inputProps: {size:4,autoCorrect: 'off', autoCapitalize: 'off', spellCheck: 'false', autoComplete: 'off'},
                 onChange: event => {
                     const newText = event.nativeEvent.target.value
                     if (newText !== selectedMin && (/^\d*$/g).test(newText)) {
@@ -48,7 +48,7 @@ const IntRangeSelector = ({selectedMin = null, selectedMax = null, onMinSelected
                 multiline: false,
                 maxRows: 1,
                 size: 'small',
-                inputProps: {size:4},
+                inputProps: {size:4,autoCorrect: 'off', autoCapitalize: 'off', spellCheck: 'false', autoComplete: 'off'},
                 onChange: event => {
                     const newText = event.nativeEvent.target.value
                     if (newText !== selectedMax && (/^\d*$/g).test(newText)) {

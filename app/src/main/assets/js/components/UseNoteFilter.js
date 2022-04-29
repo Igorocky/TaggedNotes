@@ -283,7 +283,7 @@ const UseNoteFilter = ({
                         multiline: false,
                         maxRows: 1,
                         size: 'small',
-                        inputProps: {size:24},
+                        inputProps: {size:24,autoCorrect: 'off', autoCapitalize: 'off', spellCheck: 'false', autoComplete: 'off'},
                         style: {margin:'5px'},
                         onChange: event => {
                             const newText = event.nativeEvent.target.value

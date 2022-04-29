@@ -41,6 +41,7 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
                     size: 'small',
                     autoFocus,
                     label,
+                    inputProps: {autoCorrect: 'off', autoCapitalize: 'off', spellCheck: 'false', autoComplete: 'off'},
                     onChange: event => setFilterText(event.nativeEvent.target.value.trim().toLowerCase()),
                     value: filterText,
                     onKeyDown: event => {
