@@ -20,7 +20,7 @@ class AppContainer(
     val dbName: String = "taggednotes-db"
 ) {
     companion object {
-        private val appVersion = "1.0"
+        private val appVersion = "1.1"
         val appVersionUrlPrefix = "v$appVersion"
     }
 
