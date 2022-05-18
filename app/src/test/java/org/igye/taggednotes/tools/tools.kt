@@ -147,9 +147,21 @@ object Tools {
         }
         if (newVersion == null) {
             throw RuntimeException("Failed to increase project version.")
-        } else {
-            return newVersion!!
         }
+        val appContainerFile = File("./app/src/main/java/org/igye/taggednotes/config/AppContainer.kt")
+        var numOfMatches = 0
+        replace(
+            srcFile = appContainerFile,
+            pattern = compile("private val appVersion = \"([\\d\\.]+)\""),
+            dstFile = appContainerFile
+        ) { matcher ->
+            numOfMatches++
+            "private val appVersion = \"$newVersion\""
+        }
+        if (numOfMatches != 1) {
+            throw RuntimeException("Failed to increase project version in AppContainer.")
+        }
+        return newVersion!!
     }
 
     private fun replace(srcFile: File, pattern: Pattern, dstFile: File, replacement: (Matcher) -> String?) {
