@@ -30,6 +30,11 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
     }
 
     const filteredTags = getFilteredTags()
+    useEffect(() => {
+        if (filteredTags.length === 1 && IS_IN_WEBVIEW) {
+            selectTag(filteredTags[0])
+        }
+    }, [filteredTags.length])
 
     function renderTagFilter() {
         if (allTags?.length) {
