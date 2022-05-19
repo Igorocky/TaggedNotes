@@ -116,7 +116,7 @@ class RepositoryManager(
         return BeRespose(ErrorCode.SHARE_BACKUP) {
             val fileUri: Uri = FileProvider.getUriForFile(
                 context,
-                "org.igye.taggednotes.fileprovider.dev",
+                "org.igye.taggednotes.fileprovider",
                 File(backupDir, args.backupName)
             )
             shareFile.get()?.invoke(fileUri)
