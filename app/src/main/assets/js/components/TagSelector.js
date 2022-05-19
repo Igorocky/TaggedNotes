@@ -13,7 +13,10 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
                 key:tag.id,
                 variant:'outlined',
                 size:'small',
-                onDelete: () => onTagRemoved(tag),
+                onDelete: () => {
+                    onTagRemoved(tag)
+                    focusFilterText()
+                },
                 label: tag.name,
                 color:color??'default',
             }))
@@ -31,7 +34,7 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
 
     const filteredTags = getFilteredTags()
     useEffect(() => {
-        if (filteredTags.length === 1 && IS_IN_WEBVIEW) {
+        if (IS_IN_WEBVIEW && filteredTags.length === 1 && filterText.length !== 0) {
             selectTag(filteredTags[0])
         }
     }, [filteredTags.length])
@@ -59,11 +62,15 @@ const TagSelector = ({allTags, selectedTags, onTagSelected, onTagRemoved, label,
         }
     }
 
-    function selectTag(tag) {
-        setFilterText('')
+    function focusFilterText() {
         if (filterTextFieldRef.current) {
             filterTextFieldRef.current.getElementsByTagName('input')[0].focus()
         }
+    }
+
+    function selectTag(tag) {
+        setFilterText('')
+        focusFilterText()
         onTagSelected(tag)
     }
 
